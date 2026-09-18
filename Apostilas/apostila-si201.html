@@ -1,0 +1,2397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SI201 — Pilhas, Filas e Listas Ligadas em C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --papel:#F4F6F5;
+  --papel-2:#FFFFFF;
+  --tinta:#14201E;
+  --tinta-fraca:#4C5C59;
+  --linha:#D5DDDA;
+  --teal:#15605A;
+  --teal-claro:#E3EFEC;
+  --azul:#274A8A;
+  --facil:#2E7D4F;
+  --medio:#9A6B05;
+  --dificil:#A62B21;
+  --codigo-bg:#10211F;
+  --codigo-tx:#DCE8E4;
+  --codigo-com:#7FA39C;
+  --codigo-kw:#7FD1C1;
+  --codigo-str:#E4C07A;
+  --sombra:0 1px 0 var(--linha);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --papel:#0E1614;
+    --papel-2:#141F1D;
+    --tinta:#E6EDEB;
+    --tinta-fraca:#9FB2AE;
+    --linha:#25332F;
+    --teal:#6FCBBB;
+    --teal-claro:#17302C;
+    --azul:#9CB8EE;
+    --facil:#6BC08D;
+    --medio:#D9AE4E;
+    --dificil:#E8897F;
+    --codigo-bg:#08100F;
+    --codigo-tx:#DCE8E4;
+  }
+}
+:root[data-theme="dark"]{
+  --papel:#0E1614;
+  --papel-2:#141F1D;
+  --tinta:#E6EDEB;
+  --tinta-fraca:#9FB2AE;
+  --linha:#25332F;
+  --teal:#6FCBBB;
+  --teal-claro:#17302C;
+  --azul:#9CB8EE;
+  --facil:#6BC08D;
+  --medio:#D9AE4E;
+  --dificil:#E8897F;
+  --codigo-bg:#08100F;
+  --codigo-tx:#DCE8E4;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{
+  margin:0;
+  background:var(--papel);
+  color:var(--tinta);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:18px;
+  line-height:1.65;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:46rem;margin:0 auto;padding:0 1.25rem 5rem}
+h1,h2,h3,h4,.mono-h{font-family:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;line-height:1.15;font-weight:700}
+h2{font-size:1.9rem;margin:3.5rem 0 .3rem;letter-spacing:-.01em}
+h3{font-size:1.3rem;margin:2.4rem 0 .5rem;color:var(--teal)}
+h4{font-size:1.05rem;margin:1.8rem 0 .3rem}
+p{margin:.85rem 0}
+a{color:var(--azul)}
+code{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:var(--teal-claro);padding:.1em .35em;border-radius:3px;word-break:break-word}
+pre{
+  font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  background:var(--codigo-bg);color:var(--codigo-tx);
+  padding:1rem 1.1rem;border-radius:6px;overflow-x:auto;
+  font-size:.8rem;line-height:1.55;margin:1rem 0;
+}
+pre code{background:none;padding:0;font-size:inherit;color:inherit}
+.c{color:var(--codigo-com);font-style:italic}
+.k{color:var(--codigo-kw)}
+.s{color:var(--codigo-str)}
+pre.diag{
+  background:var(--papel-2);color:var(--tinta);
+  border:1px solid var(--linha);border-left:3px solid var(--teal);
+  font-size:.78rem;line-height:1.5;
+}
+/* cabeçalho fixo */
+.barra{
+  position:sticky;top:0;z-index:20;background:var(--papel);
+  border-bottom:1px solid var(--linha);
+  font-family:"Bricolage Grotesque",Arial,sans-serif;font-size:.78rem;
+}
+.barra-in{max-width:46rem;margin:0 auto;padding:.55rem 1.25rem;display:flex;gap:.9rem;overflow-x:auto;white-space:nowrap}
+.barra a{color:var(--tinta-fraca);text-decoration:none;font-weight:500}
+.barra a:hover,.barra a:focus{color:var(--teal)}
+/* hero */
+.hero{border-bottom:1px solid var(--linha);padding:3rem 0 2.2rem;margin-bottom:1rem}
+.hero h1{font-size:clamp(2rem,7vw,3.1rem);margin:.2rem 0 .6rem;letter-spacing:-.02em}
+.hero .sub{color:var(--tinta-fraca);font-size:1.02rem;margin:0}
+.hero pre{margin-top:1.8rem}
+.selo{font-family:"Bricolage Grotesque",Arial,sans-serif;font-size:.8rem;color:var(--teal);font-weight:700}
+/* blocos */
+.nota,.alerta,.dica{
+  border:1px solid var(--linha);border-left:3px solid var(--teal);
+  background:var(--papel-2);padding:.85rem 1rem;margin:1.3rem 0;border-radius:0 5px 5px 0;font-size:.95rem;
+}
+.alerta{border-left-color:var(--dificil)}
+.dica{border-left-color:var(--medio)}
+.nota p:first-child,.alerta p:first-child,.dica p:first-child{margin-top:0}
+.nota p:last-child,.alerta p:last-child,.dica p:last-child{margin-bottom:0}
+.rotulo{font-family:"Bricolage Grotesque",Arial,sans-serif;font-weight:700;font-size:.82rem;display:block;margin-bottom:.15rem}
+.alerta .rotulo{color:var(--dificil)}
+.dica .rotulo{color:var(--medio)}
+.nota .rotulo{color:var(--teal)}
+/* tabelas */
+.tabela{overflow-x:auto;margin:1.2rem 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:30rem}
+th,td{border:1px solid var(--linha);padding:.45rem .6rem;text-align:left;vertical-align:top}
+th{background:var(--teal-claro);font-family:"Bricolage Grotesque",Arial,sans-serif;font-size:.8rem}
+tbody tr:nth-child(even){background:var(--papel-2)}
+/* exercícios */
+.ex{border-top:1px solid var(--linha);padding-top:1rem;margin-top:1.6rem}
+.nivel{font-family:"Bricolage Grotesque",Arial,sans-serif;font-weight:700;font-size:.78rem}
+.n1{color:var(--facil)}.n2{color:var(--medio)}.n3{color:var(--dificil)}
+.espaco{border:1px dashed var(--linha);border-radius:5px;height:3.5rem;margin:.8rem 0;display:flex;align-items:center;justify-content:center;color:var(--tinta-fraca);font-size:.8rem;font-family:"Bricolage Grotesque",Arial,sans-serif}
+details{margin:.8rem 0;border:1px solid var(--linha);border-radius:5px;background:var(--papel-2)}
+summary{cursor:pointer;padding:.6rem .9rem;font-family:"Bricolage Grotesque",Arial,sans-serif;font-weight:700;font-size:.88rem;color:var(--teal);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";display:inline-block;transition:transform .15s}
+details[open] summary::before{content:"▾ "}
+details .conteudo{padding:0 .9rem .6rem;border-top:1px solid var(--linha)}
+details .conteudo pre{font-size:.76rem}
+/* resumo de capítulo */
+.resumo{background:var(--teal-claro);border-radius:6px;padding:1rem 1.2rem;margin:2.2rem 0 1rem}
+.resumo h4{margin-top:0;color:var(--teal)}
+.resumo ul{margin:.4rem 0 0;padding-left:1.1rem}
+.resumo li{margin:.3rem 0;font-size:.93rem}
+/* checklist */
+.check{list-style:none;padding:0;margin:1rem 0}
+.check li{display:flex;gap:.6rem;align-items:flex-start;padding:.35rem 0;border-bottom:1px dashed var(--linha);font-size:.93rem}
+.check input{margin-top:.45rem;accent-color:var(--teal);width:1rem;height:1rem;flex:none}
+.check input:checked + span{color:var(--tinta-fraca);text-decoration:line-through}
+ul,ol{padding-left:1.2rem}
+li{margin:.35rem 0}
+hr{border:none;border-top:1px solid var(--linha);margin:3rem 0}
+.rodape{color:var(--tinta-fraca);font-size:.85rem;border-top:1px solid var(--linha);padding-top:1rem;margin-top:3rem}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+@media (max-width:480px){body{font-size:17px}pre{font-size:.72rem}}
+</style>
+</head>
+<body>
+
+<nav class="barra" aria-label="Capítulos">
+  <div class="barra-in">
+    <a href="#cap0">0. Como usar</a>
+    <a href="#cap1">1. Base em C</a>
+    <a href="#cap2">2. Pilhas</a>
+    <a href="#cap3">3. Filas</a>
+    <a href="#cap4">4. Listas ligadas</a>
+    <a href="#cap5">5. Comparações</a>
+    <a href="#cap6">6. Para a prova</a>
+    <a href="#cap7">7. Revisão geral</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="selo">SI201 B — Estruturas de Dados I · Prova 1</span>
+  <h1>Pilhas, filas e listas ligadas em C</h1>
+  <p class="sub">Uma apostila para sair implementando as três estruturas do zero, entendendo cada ponteiro que se move.</p>
+<pre class="diag">
+   PILHA                FILA                   LISTA LIGADA
+   (LIFO)               (FIFO)                 (acesso sequencial)
+
+   topo -&gt; [30]         [10] [20] [30]         [10]-&gt;[20]-&gt;[30]-&gt;NULL
+           [20]          ^            ^          ^
+           [10]          |            |          |
+          ------      inicio         fim       inicio (cabeça)
+
+   entra e sai        entra no fim,           insere e remove
+   pelo mesmo lado    sai pelo início         em qualquer posição
+</pre>
+</header>
+
+<h2 id="cap0">0. Como usar esta apostila</h2>
+
+<p>Ela segue exatamente a ordem das aulas 4, 5 e 6 do cronograma da disciplina: pilhas (4/9), filas (11/9) e listas ligadas (18/9). Cada capítulo vai de teoria → representação em C → operações → exemplos → exercícios → resumo.</p>
+
+<p>Leia com o editor de código aberto do lado. A parte que cai na prova não é "saber o que é uma pilha" — é conseguir escrever <code>push</code> e <code>pop</code> corretos e dizer o que acontece com cada ponteiro. Digite os códigos você mesmo, sem copiar e colar: é assim que a manipulação de ponteiros vira automática.</p>
+
+<p>Os exercícios vêm com um espaço em branco antes da resolução. Tente de verdade antes de abrir a <strong>Resolução comentada</strong> — abrir cedo demais dá a sensação de que você entendeu sem que você tenha entendido.</p>
+
+<div class="nota">
+  <span class="rotulo">Sobre a origem do conteúdo</span>
+  <p>O plano de ensino que você anexou define os <em>tópicos</em> das aulas ("Pilhas usando vetores e listas ligadas", "Filas usando vetores e listas ligadas", "Listas ligadas"), a ementa (representação e manipulação de dados na memória interna, algoritmos de busca, inserção, remoção e percurso) e a bibliografia — mas <strong>não traz o conteúdo detalhado, nem código, nem a notação específica usada em sala</strong>.</p>
+  <p>Ou seja: tudo que vem a seguir — structs, assinaturas de função, nomes de campo, exercícios — é conhecimento geral da área, alinhado com a bibliografia básica da disciplina (Backes; Celes, Cerqueira &amp; Rangel; Pedrini). Se o professor usou nomes ou convenções diferentes em sala (por exemplo, fila com dois índices em vez de <code>inicio + qtd</code>, ou lista com nó-cabeça), <strong>vale o que ele usou</strong>. Trate esta apostila como a explicação do "porquê"; a notação oficial é a dos slides dele.</p>
+</div>
+
+<div class="dica">
+  <span class="rotulo">O que mais cai junto</span>
+  <p>A Prova 1 cobre as aulas 1 a 6, então além das três estruturas entram <strong>notação assintótica (O e Θ)</strong>, tempo de execução e <strong>tipo abstrato de dados (TAD)</strong>. Por isso a complexidade de cada operação aparece o tempo todo aqui, e o capítulo 1 fecha com TAD.</p>
+</div>
+
+<h2 id="cap1">1. A base: memória, ponteiros e structs</h2>
+
+<p>Antes de qualquer estrutura, precisamos estar 100% confortáveis com quatro coisas: variável na memória, ponteiro, <code>struct</code> e alocação dinâmica. Se você já domina, leia rápido — mas leia, porque os erros de prova em listas ligadas quase sempre são erros destas quatro coisas.</p>
+
+<h3>1.1 Memória: uma rua de casas numeradas</h3>
+
+<p>Pense na memória do computador como uma rua enorme, com casas numeradas de 0 em diante. Cada casa guarda um byte. Quando você declara <code>int x = 10;</code>, o compilador reserva 4 casas seguidas e escreve 10 lá dentro. O número da primeira casa é o <strong>endereço</strong> de <code>x</code>.</p>
+
+<pre class="diag">
+   endereço:   1000   1004   1008   1012
+             +------+------+------+------+
+   memória:  |  10  |  25  |  ??  |  ??  |
+             +------+------+------+------+
+                x      y
+</pre>
+
+<p>Dois operadores fazem a ponte entre valor e endereço:</p>
+
+<ul>
+  <li><code>&amp;x</code> — "o endereço de x" (leia: <em>onde</em> x mora). Vale 1000 no desenho acima.</li>
+  <li><code>*p</code> — "o conteúdo do endereço guardado em p" (leia: <em>o que mora lá</em>).</li>
+</ul>
+
+<h3>1.2 Ponteiro: uma variável que guarda um endereço</h3>
+
+<p>Um ponteiro é uma variável normal. A diferença é que o valor que ela guarda é um endereço de memória, e o tipo dela diz o que esperar nesse endereço.</p>
+
+<pre><code><span class="k">int</span> x = <span class="s">10</span>;
+<span class="k">int</span> *p;      <span class="c">/* p é um ponteiro para int */</span>
+p = &amp;x;      <span class="c">/* p passa a guardar o endereço de x */</span>
+printf(<span class="s">"%d"</span>, *p);   <span class="c">/* imprime 10: "vá até o endereço em p e leia" */</span>
+*p = <span class="s">99</span>;    <span class="c">/* escreve 99 DENTRO de x, sem tocar no nome x */</span>
+</code></pre>
+
+<pre class="diag">
+      p                      x
+   +------+               +------+
+   | 1000 | ------------&gt; |  99  |
+   +------+               +------+
+   (end. 2000)            (end. 1000)
+</pre>
+
+<p>A seta do desenho é o coração de tudo o que vem depois. Uma lista ligada é só um monte dessas setas encadeadas.</p>
+
+<h4>NULL: a seta que não aponta para lugar nenhum</h4>
+
+<p><code>NULL</code> é um valor especial de ponteiro que significa "este ponteiro não aponta para nada válido". Usamos <code>NULL</code> para marcar:</p>
+
+<ul>
+  <li>o <strong>fim</strong> de uma lista ligada (o último nó aponta para NULL);</li>
+  <li>uma estrutura <strong>vazia</strong> (lista/pilha vazia = ponteiro inicial em NULL);</li>
+  <li>uma <strong>falha</strong> de <code>malloc</code> ou uma busca que não achou nada.</li>
+</ul>
+
+<div class="alerta">
+  <span class="rotulo">O erro que mais derruba programa</span>
+  <p>Fazer <code>p-&gt;info</code> quando <code>p</code> é NULL. Isso é acessar o endereço 0 → <em>segmentation fault</em>. Regra permanente: <strong>antes de usar um ponteiro, garanta que ele não é NULL</strong>. Em prova escrita, o professor adora colocar exatamente esse caso (remover de lista vazia, consultar topo de pilha vazia).</p>
+</div>
+
+<h3>1.3 struct: agrupando dados que andam juntos</h3>
+
+<p>Uma <code>struct</code> junta várias variáveis sob um nome só. É o que nos deixa dizer "uma pilha é um vetor <em>mais</em> um índice de topo" e tratar os dois como uma coisa só.</p>
+
+<pre><code><span class="k">struct</span> aluno {
+    <span class="k">int</span> ra;
+    <span class="k">float</span> nota;
+};
+
+<span class="k">struct</span> aluno a;
+a.ra = <span class="s">200123</span>;        <span class="c">/* acesso por variável:  ponto  */</span>
+
+<span class="k">struct</span> aluno *pa = &amp;a;
+pa-&gt;ra = <span class="s">200123</span>;      <span class="c">/* acesso por ponteiro:  seta   */</span>
+(*pa).ra = <span class="s">200123</span>;   <span class="c">/* exatamente a mesma coisa que a linha acima */</span>
+</code></pre>
+
+<div class="nota">
+  <span class="rotulo">Ponto ou seta?</span>
+  <p>Regra mecânica: <strong>se a variável é um ponteiro, use <code>-&gt;</code>; se não é, use <code>.</code></strong> Em listas ligadas você praticamente só usa <code>-&gt;</code>, porque quase tudo é ponteiro.</p>
+</div>
+
+<h4>typedef: encurtando o nome</h4>
+
+<pre><code><span class="k">typedef</span> <span class="k">struct</span> {
+    <span class="k">int</span> ra;
+    <span class="k">float</span> nota;
+} Aluno;
+
+Aluno a;   <span class="c">/* em vez de: struct aluno a; */</span>
+</code></pre>
+
+<h3>1.4 Alocação dinâmica: criando memória durante a execução</h3>
+
+<p>Um vetor <code>int v[100]</code> tem tamanho decidido na hora de escrever o programa. Já <code>malloc</code> pede memória <em>enquanto o programa roda</em>, e devolve o endereço do pedaço reservado.</p>
+
+<pre><code><span class="c">/* #include &lt;stdlib.h&gt; é obrigatório */</span>
+
+No *novo = (No*) malloc(<span class="k">sizeof</span>(No));
+<span class="k">if</span> (novo == NULL) {
+    <span class="c">/* memória acabou: trate o erro, não siga em frente */</span>
+}
+...
+free(novo);   <span class="c">/* devolve a memória ao sistema */</span>
+</code></pre>
+
+<p>Linha por linha:</p>
+
+<ul>
+  <li><code>sizeof(No)</code> — quantos bytes um nó ocupa. Nunca chute um número; deixe o compilador calcular.</li>
+  <li><code>malloc(...)</code> — reserva esse tanto de bytes e devolve o endereço inicial (ou NULL se não conseguiu).</li>
+  <li><code>(No*)</code> — converte o endereço genérico devolvido por <code>malloc</code> para "endereço de um No". Em C puro é opcional, mas deixa a intenção clara.</li>
+  <li><code>free(novo)</code> — libera. Sem isso, a memória fica presa até o programa acabar (<em>memory leak</em>).</li>
+</ul>
+
+<div class="alerta">
+  <span class="rotulo">Três regras de free</span>
+  <p>1. Só se dá <code>free</code> em ponteiro que veio de <code>malloc</code>. <br>
+     2. Depois do <code>free</code>, o ponteiro vira lixo — não leia mais nada dele. <br>
+     3. Se você vai precisar do <code>prox</code> de um nó, <strong>guarde antes de liberar</strong>. Liberar e depois ler <code>p-&gt;prox</code> é o clássico erro de "libera lista inteira".</p>
+</div>
+
+<h3>1.5 Tipo Abstrato de Dados (TAD)</h3>
+
+<p>Um TAD é a descrição de uma estrutura pelo <strong>que ela faz</strong>, não por <em>como</em> é feita por dentro. "Pilha" como TAD é: um conjunto de elementos com as operações criar, empilhar, desempilhar, consultar topo e testar se está vazia — e a garantia de que sai sempre o último que entrou.</p>
+
+<p>Como isso é implementado por dentro (vetor? lista ligada?) é problema de quem escreve a estrutura, não de quem usa. É exatamente por isso que o título da aula é "Pilhas usando <em>vetores e listas ligadas</em>": mesmo TAD, duas implementações, e o código do usuário não muda.</p>
+
+<pre class="diag">
+   quem USA a pilha:   push(&amp;p, 10);  pop(&amp;p, &amp;x);   &lt;- não muda nunca
+   ---------------------------------------------------
+   quem IMPLEMENTA:    vetor + topo   OU   nós ligados  &lt;- pode trocar
+</pre>
+
+<p>Na prática em C isso vira: o <code>.h</code> declara o tipo e as funções (a interface), o <code>.c</code> guarda a struct e o corpo das funções (a implementação).</p>
+
+<div class="resumo">
+  <h4>Resumo do capítulo 1</h4>
+  <ul>
+    <li><code>&amp;x</code> pega endereço; <code>*p</code> acessa o conteúdo; <code>p-&gt;campo</code> é <code>(*p).campo</code>.</li>
+    <li>Ponteiro é variável que guarda endereço — desenhe sempre como uma seta.</li>
+    <li><code>NULL</code> = fim de lista, estrutura vazia ou falha. Nunca desreferencie NULL.</li>
+    <li><code>malloc(sizeof(T))</code> cria; <code>free(p)</code> destrói; teste sempre o retorno de malloc.</li>
+    <li>TAD separa o <em>que faz</em> do <em>como faz</em> — a mesma pilha com duas implementações.</li>
+  </ul>
+</div>
+
+<h2 id="cap2">2. Pilhas</h2>
+
+<h3>2.1 A ideia intuitiva</h3>
+
+<p>Uma pilha de pratos na cozinha: você coloca um prato novo em cima e, quando precisa de um, pega o de cima. Para chegar no prato do fundo, você teria que tirar todos os de cima antes. Nenhuma outra posição é acessível.</p>
+
+<p>Formalmente: uma <strong>pilha</strong> é uma coleção em que inserção e remoção acontecem sempre na mesma extremidade, chamada <strong>topo</strong>. Por isso a política dela é <strong>LIFO</strong> — <em>Last In, First Out</em>, o último que entra é o primeiro que sai.</p>
+
+<pre class="diag">
+   push(10)   push(20)   push(30)    pop() -&gt; 30   pop() -&gt; 20
+
+                          [30] topo
+              [20] topo   [20]         [20] topo
+   [10] topo  [10]        [10]         [10]         [10] topo
+   ---------  ---------   ---------    ---------    ---------
+</pre>
+
+<h3>2.2 Para que serve</h3>
+
+<p>Pilha é a estrutura certa sempre que o problema tem a forma <em>"o último pendente é o próximo a resolver"</em>:</p>
+
+<ul>
+  <li><strong>Ctrl+Z</strong> — desfazer sempre a última ação.</li>
+  <li><strong>Botão voltar do navegador</strong> — volta para a última página visitada.</li>
+  <li><strong>Chamadas de função</strong> — a famosa <em>pilha de execução</em>: a função que retorna é sempre a última chamada. Recursão é literalmente uma pilha.</li>
+  <li><strong>Verificação de parênteses/chaves</strong> — cada fechamento casa com a última abertura em aberto.</li>
+  <li><strong>Expressões pós-fixas</strong> (notação polonesa reversa) e conversão infixa→pós-fixa.</li>
+</ul>
+
+<h3>2.3 As operações do TAD Pilha</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Operação</th><th>O que faz</th><th>Cuidado</th></tr></thead>
+<tbody>
+<tr><td><code>inicializa</code></td><td>deixa a pilha pronta e vazia</td><td>esquecer isso = topo com lixo</td></tr>
+<tr><td><code>vazia</code></td><td>responde se não há elementos</td><td>testar antes de pop e top</td></tr>
+<tr><td><code>push</code></td><td>insere no topo</td><td>com vetor: pode encher (<em>overflow</em>)</td></tr>
+<tr><td><code>pop</code></td><td>remove e devolve o topo</td><td>pilha vazia = <em>underflow</em></td></tr>
+<tr><td><code>top</code> / <code>peek</code></td><td>lê o topo <strong>sem remover</strong></td><td>não mexer no índice/ponteiro</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="dica">
+  <span class="rotulo">Diferença que cai em prova</span>
+  <p><code>pop</code> remove; <code>top</code> só olha. Depois de <code>top</code>, a pilha está exatamente igual a antes. Depois de <code>pop</code>, tem um elemento a menos.</p>
+</div>
+
+<h3>2.4 Implementação com vetor</h3>
+
+<h4>Representação</h4>
+
+<pre><code><span class="c">#define MAX 100</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> {
+    <span class="k">int</span> dados[MAX];   <span class="c">/* os elementos, do fundo (0) para o topo */</span>
+    <span class="k">int</span> topo;         <span class="c">/* índice do elemento do topo; -1 = vazia  */</span>
+} Pilha;
+</code></pre>
+
+<p>O que cada parte significa:</p>
+
+<ul>
+  <li><code>dados[MAX]</code> — memória já reservada, tamanho fixo. O elemento do fundo fica em <code>dados[0]</code>.</li>
+  <li><code>topo</code> — a única coisa que realmente "se move". Ele é o índice do último elemento inserido.</li>
+  <li><strong>Por que topo começa em -1?</strong> Porque -1 não é um índice válido, então ele significa naturalmente "não tem elemento nenhum". E aí <code>topo</code> também vira a quantidade menos 1: com 3 elementos, <code>topo == 2</code>.</li>
+</ul>
+
+<pre class="diag">
+   Pilha com 10, 20, 30 (30 no topo):
+
+   índice:    0     1     2     3    ...   99
+            +-----+-----+-----+-----+     +-----+
+   dados:   | 10  | 20  | 30  |  ?  | ... |  ?  |
+            +-----+-----+-----+-----+     +-----+
+                           ^
+                        topo = 2
+</pre>
+
+<h4>Código completo e comentado</h4>
+
+<pre><code><span class="k">void</span> inicializa(Pilha *p) {
+    p-&gt;topo = -<span class="s">1</span>;
+}
+
+<span class="k">int</span> vazia(Pilha *p) {
+    <span class="k">return</span> p-&gt;topo == -<span class="s">1</span>;
+}
+
+<span class="k">int</span> cheia(Pilha *p) {
+    <span class="k">return</span> p-&gt;topo == MAX - <span class="s">1</span>;
+}
+
+<span class="k">int</span> push(Pilha *p, <span class="k">int</span> v) {
+    <span class="k">if</span> (cheia(p)) <span class="k">return</span> <span class="s">0</span>;      <span class="c">/* 0 = não deu certo (overflow) */</span>
+    p-&gt;topo++;                     <span class="c">/* 1) abre espaço: sobe o topo  */</span>
+    p-&gt;dados[p-&gt;topo] = v;         <span class="c">/* 2) escreve na nova posição   */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+
+<span class="k">int</span> pop(Pilha *p, <span class="k">int</span> *saida) {
+    <span class="k">if</span> (vazia(p)) <span class="k">return</span> <span class="s">0</span>;      <span class="c">/* underflow */</span>
+    *saida = p-&gt;dados[p-&gt;topo];    <span class="c">/* 1) copia o valor para quem chamou */</span>
+    p-&gt;topo--;                     <span class="c">/* 2) desce o topo                   */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+
+<span class="k">int</span> top(Pilha *p, <span class="k">int</span> *saida) {
+    <span class="k">if</span> (vazia(p)) <span class="k">return</span> <span class="s">0</span>;
+    *saida = p-&gt;dados[p-&gt;topo];    <span class="c">/* só lê; topo não muda */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+</code></pre>
+
+<p>Três detalhes que valem nota:</p>
+
+<ol>
+  <li><strong>Por que <code>Pilha *p</code> e não <code>Pilha p</code>?</strong> Em C, parâmetro é cópia. Se a função recebesse uma cópia da pilha, o <code>topo</code> alterado morreria no fim da função. Passando o endereço, a função mexe na pilha original. Por isso quem chama escreve <code>push(&amp;p, 10)</code>.</li>
+  <li><strong>Por que <code>pop</code> devolve o valor por parâmetro?</strong> Porque o <code>return</code> já está sendo usado para dizer se a operação deu certo. <code>pop(&amp;p, &amp;x)</code> devolve 1/0 e coloca o valor removido em <code>x</code>. É a forma mais segura: um <code>pop</code> que retorna <code>int</code> direto não tem como sinalizar pilha vazia.</li>
+  <li><strong>Ordem das linhas em <code>pop</code> vs <code>push</code>:</strong> no push, primeiro sobe o índice e depois escreve; no pop, primeiro lê e depois desce. Inverter a ordem no pop faz você devolver lixo.</li>
+</ol>
+
+<div class="nota">
+  <span class="rotulo">Elementos "removidos" continuam lá</span>
+  <p>Quando <code>topo</code> desce, o valor antigo não é apagado do vetor — ele só passa a estar fora da região válida. Se um exercício perguntar o conteúdo de <code>dados[2]</code> depois de um pop, o valor continua lá; o que mudou foi o <code>topo</code>. Isso é pegadinha frequente.</p>
+</div>
+
+<h3>2.5 Implementação com lista ligada</h3>
+
+<p>Aqui não existe vetor: cada elemento vira um <strong>nó</strong> alocado dinamicamente, e o topo é um ponteiro para o primeiro nó da corrente.</p>
+
+<pre><code><span class="k">typedef</span> <span class="k">struct</span> No {
+    <span class="k">int</span> info;
+    <span class="k">struct</span> No *prox;      <span class="c">/* aponta para o nó de baixo */</span>
+} No;
+
+<span class="k">typedef</span> <span class="k">struct</span> {
+    No *topo;             <span class="c">/* NULL quando a pilha está vazia */</span>
+} Pilha;
+</code></pre>
+
+<div class="dica">
+  <span class="rotulo">Por que <code>struct No *prox</code> e não <code>No *prox</code>?</span>
+  <p>Dentro da própria declaração, o apelido <code>No</code> criado pelo <code>typedef</code> ainda não existe. Por isso o nome <code>struct No</code> depois da palavra <code>struct</code> é obrigatório: é ele que permite o campo apontar para o próprio tipo.</p>
+</div>
+
+<pre class="diag">
+   topo
+    |
+    v
+  +----+----+    +----+----+    +----+----+
+  | 30 |  *-+---&gt;| 20 |  *-+---&gt;| 10 |NULL|
+  +----+----+    +----+----+    +----+----+
+   (topo)                        (fundo)
+</pre>
+
+<h4>push com lista ligada — três linhas que você precisa saber de cor</h4>
+
+<pre><code><span class="k">int</span> push(Pilha *p, <span class="k">int</span> v) {
+    No *novo = (No*) malloc(<span class="k">sizeof</span>(No));
+    <span class="k">if</span> (novo == NULL) <span class="k">return</span> <span class="s">0</span>;
+
+    novo-&gt;info = v;          <span class="c">/* 1) preenche o dado           */</span>
+    novo-&gt;prox = p-&gt;topo;    <span class="c">/* 2) novo aponta pro topo atual*/</span>
+    p-&gt;topo   = novo;         <span class="c">/* 3) topo passa a ser o novo   */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+</code></pre>
+
+<p>A ordem 2 → 3 é <strong>obrigatória</strong>. Veja o que acontece se você inverter:</p>
+
+<pre class="diag">
+   ORDEM CERTA                       ORDEM ERRADA (topo = novo primeiro)
+
+   topo --&gt; [20] --&gt; [10]            topo --&gt; [20] --&gt; [10]
+   novo = [30]                       novo = [30]
+
+   (2) novo-&gt;prox = topo             (a) topo = novo
+       [30] --&gt; [20] --&gt; [10]            topo --&gt; [30]   ... e [20],[10]
+   (3) topo = novo                       ficaram inacessíveis: VAZAMENTO
+       topo --&gt; [30] --&gt; [20] --&gt; [10]  (b) novo-&gt;prox = topo  -&gt;  aponta
+                                            pra ele mesmo: LOOP INFINITO
+</pre>
+
+<div class="nota">
+  <span class="rotulo">Caso da pilha vazia — funciona sozinho</span>
+  <p>Se a pilha está vazia, <code>p-&gt;topo</code> é NULL. Aí <code>novo-&gt;prox = NULL</code>, que é exatamente o que queremos para o nó do fundo. Nenhum <code>if</code> especial é necessário — isso é elegância de ponteiro e o professor costuma perguntar por quê.</p>
+</div>
+
+<h4>pop com lista ligada</h4>
+
+<pre><code><span class="k">int</span> pop(Pilha *p, <span class="k">int</span> *saida) {
+    No *aux;
+    <span class="k">if</span> (p-&gt;topo == NULL) <span class="k">return</span> <span class="s">0</span>;
+
+    aux    = p-&gt;topo;        <span class="c">/* 1) guarda quem vai sair       */</span>
+    *saida = aux-&gt;info;      <span class="c">/* 2) copia o valor              */</span>
+    p-&gt;topo = aux-&gt;prox;     <span class="c">/* 3) topo passa a ser o de baixo*/</span>
+    free(aux);               <span class="c">/* 4) só agora libera            */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+</code></pre>
+
+<p>O <code>aux</code> não é enfeite: sem ele, ao fazer <code>p-&gt;topo = p-&gt;topo-&gt;prox</code> você perde o endereço do nó antigo e não consegue mais liberá-lo. E fazer <code>free</code> antes de ler <code>aux-&gt;prox</code> é acessar memória já devolvida.</p>
+
+<pre class="diag">
+   antes:   topo --&gt; [30] --&gt; [20] --&gt; [10] --&gt; NULL
+                      aux
+
+   (3)      topo ------------&gt; [20] --&gt; [10] --&gt; NULL
+                      [30]  (solto, ainda alocado)
+
+   (4)      topo ------------&gt; [20] --&gt; [10] --&gt; NULL    free(aux)
+</pre>
+
+<h4>Liberar a pilha inteira</h4>
+
+<pre><code><span class="k">void</span> libera(Pilha *p) {
+    <span class="k">int</span> x;
+    <span class="k">while</span> (!vazia(p)) pop(p, &amp;x);
+}
+</code></pre>
+
+<h3>2.6 Exemplos práticos, do mais simples ao mais difícil</h3>
+
+<h4>Exemplo 1 — empilhar e esvaziar (o "olá mundo" da pilha)</h4>
+
+<p><strong>Problema:</strong> ler 3 números, empilhar e imprimir na ordem inversa.</p>
+<p><strong>Lógica:</strong> como a pilha é LIFO, basta empilhar tudo e desempilhar até esvaziar — a inversão sai de graça.</p>
+
+<pre><code><span class="k">int</span> main(<span class="k">void</span>) {
+    Pilha p;
+    <span class="k">int</span> i, v, x;
+    inicializa(&amp;p);
+
+    <span class="k">for</span> (i = <span class="s">0</span>; i &lt; <span class="s">3</span>; i++) {
+        scanf(<span class="s">"%d"</span>, &amp;v);
+        push(&amp;p, v);
+    }
+    <span class="k">while</span> (pop(&amp;p, &amp;x))
+        printf(<span class="s">"%d "</span>, x);
+    <span class="k">return</span> <span class="s">0</span>;
+}
+</code></pre>
+
+<p><strong>Estado passo a passo</strong> (entrada 10, 20, 30):</p>
+
+<pre class="diag">
+   push(10):  topo=0   dados: [10]
+   push(20):  topo=1   dados: [10][20]
+   push(30):  topo=2   dados: [10][20][30]
+   pop -&gt; 30  topo=1
+   pop -&gt; 20  topo=0
+   pop -&gt; 10  topo=-1
+   pop -&gt; retorna 0, while termina.   Saída: 30 20 10
+</pre>
+
+<p>Repare que <code>while (pop(&amp;p, &amp;x))</code> usa o retorno como condição: enquanto der certo, continua; quando a pilha esvazia, <code>pop</code> devolve 0 e o laço acaba. Esse é o padrão idiomático.</p>
+
+<h4>Exemplo 2 — converter decimal para binário</h4>
+
+<p><strong>Problema:</strong> imprimir um número em base 2.</p>
+<p><strong>Lógica:</strong> divisões sucessivas por 2 geram os dígitos do <em>menos</em> significativo para o mais significativo — ordem invertida da que queremos imprimir. Inverter ordem é o trabalho natural de uma pilha.</p>
+
+<pre><code><span class="k">void</span> binario(<span class="k">int</span> n) {
+    Pilha p;
+    <span class="k">int</span> x;
+    inicializa(&amp;p);
+
+    <span class="k">if</span> (n == <span class="s">0</span>) { printf(<span class="s">"0"</span>); <span class="k">return</span>; }
+    <span class="k">while</span> (n &gt; <span class="s">0</span>) {
+        push(&amp;p, n % <span class="s">2</span>);   <span class="c">/* guarda o resto */</span>
+        n = n / <span class="s">2</span>;
+    }
+    <span class="k">while</span> (pop(&amp;p, &amp;x))
+        printf(<span class="s">"%d"</span>, x);
+}
+</code></pre>
+
+<pre class="diag">
+   n = 13:
+     13 % 2 = 1   push(1)    n=6     pilha: [1]
+      6 % 2 = 0   push(0)    n=3     pilha: [1][0]
+      3 % 2 = 1   push(1)    n=1     pilha: [1][0][1]
+      1 % 2 = 1   push(1)    n=0     pilha: [1][0][1][1]
+   desempilha: 1 1 0 1   -&gt;   13 = 1101 (b)
+</pre>
+
+<h4>Exemplo 3 — parênteses balanceados</h4>
+
+<p><strong>Problema:</strong> dada uma string, dizer se os parênteses fecham corretamente. <code>"(()())"</code> é válido; <code>"(()"</code> e <code>"())("</code> não.</p>
+
+<p><strong>Lógica:</strong> cada <code>)</code> tem que casar com o <code>(</code> <em>mais recente ainda em aberto</em> — é a definição de LIFO. Então: abriu, empilha; fechou, desempilha. Dois jeitos de falhar:</p>
+
+<ul>
+  <li>veio um <code>)</code> com a pilha vazia → fechou algo que nunca abriu;</li>
+  <li>acabou a string com a pilha não vazia → sobrou coisa aberta.</li>
+</ul>
+
+<pre><code><span class="k">int</span> balanceado(<span class="k">const</span> <span class="k">char</span> *s) {
+    Pilha p;
+    <span class="k">int</span> i, x;
+    inicializa(&amp;p);
+
+    <span class="k">for</span> (i = <span class="s">0</span>; s[i] != <span class="s">'\0'</span>; i++) {
+        <span class="k">if</span> (s[i] == <span class="s">'('</span>)
+            push(&amp;p, s[i]);
+        <span class="k">else</span> <span class="k">if</span> (s[i] == <span class="s">')'</span>) {
+            <span class="k">if</span> (!pop(&amp;p, &amp;x)) <span class="k">return</span> <span class="s">0</span>;   <span class="c">/* fechou sem ter aberto */</span>
+        }
+    }
+    <span class="k">return</span> vazia(&amp;p);   <span class="c">/* sobrou aberto? então não está balanceado */</span>
+}
+</code></pre>
+
+<pre class="diag">
+   s = "(()"                      s = "()()"
+   '(' push   pilha: [(]          '(' push   [(]
+   '(' push   pilha: [(][(]       ')' pop    []
+   ')' pop    pilha: [(]          '(' push   [(]
+   fim: pilha NÃO vazia -&gt; 0      ')' pop    []
+                                  fim: vazia -&gt; 1
+</pre>
+
+<div class="dica">
+  <span class="rotulo">Versão estendida</span>
+  <p>Com <code>()</code>, <code>[]</code> e <code>{}</code> juntos, empilhe o próprio caractere de abertura e, ao fechar, verifique se o desempilhado é o <em>par correspondente</em>. Se não for, já retorna 0. Esse é um exercício clássico de prova.</p>
+</div>
+
+<h3>2.7 Complexidade</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Operação</th><th>Vetor</th><th>Lista ligada</th><th>Por quê</th></tr></thead>
+<tbody>
+<tr><td>inicializa</td><td>Θ(1)</td><td>Θ(1)</td><td>uma atribuição</td></tr>
+<tr><td>vazia</td><td>Θ(1)</td><td>Θ(1)</td><td>uma comparação</td></tr>
+<tr><td>push</td><td>Θ(1)</td><td>Θ(1)</td><td>mexe só no topo (malloc à parte)</td></tr>
+<tr><td>pop</td><td>Θ(1)</td><td>Θ(1)</td><td>mexe só no topo</td></tr>
+<tr><td>top</td><td>Θ(1)</td><td>Θ(1)</td><td>uma leitura</td></tr>
+<tr><td>libera tudo</td><td>Θ(1)</td><td>Θ(n)</td><td>lista precisa dar free em cada nó</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Todas as operações essenciais são Θ(1) nas duas implementações: nenhuma delas precisa percorrer a estrutura. Essa é a grande virtude da pilha.</p>
+
+<h3>2.8 Exercícios de pilha</h3>
+
+<div class="ex">
+<p><span class="nivel n1">🟢 Fácil — P1.</span> Uma pilha vazia recebe: <code>push(4)</code>, <code>push(7)</code>, <code>top()</code>, <code>push(1)</code>, <code>pop()</code>, <code>pop()</code>, <code>push(9)</code>. Qual o conteúdo final da pilha (do fundo para o topo) e qual o valor devolvido por cada <code>pop</code>? Se fosse implementação por vetor, quanto vale <code>topo</code> no fim?</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre class="diag">
+   push(4)   [4]                  topo=0
+   push(7)   [4][7]               topo=1
+   top()     [4][7]  devolve 7    topo=1   (NÃO muda nada)
+   push(1)   [4][7][1]            topo=2
+   pop()     [4][7]  devolve 1    topo=1
+   pop()     [4]     devolve 7    topo=0
+   push(9)   [4][9]               topo=1
+</pre>
+<p>Pilha final, do fundo para o topo: <strong>4, 9</strong>. Pops devolveram <strong>1</strong> e depois <strong>7</strong>. <code>topo = 1</code>.</p>
+<p>O ponto do exercício é o <code>top()</code> no meio: quem confunde <code>top</code> com <code>pop</code> erra tudo daí em diante.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n1">🟢 Fácil — P2.</span> Por que na pilha com vetor inicializamos <code>topo = -1</code> e não <code>topo = 0</code>? Existe implementação correta com <code>topo = 0</code>? O que mudaria no <code>push</code>, no <code>pop</code> e no teste de vazia?</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p>Com <code>topo = -1</code>, o campo guarda o <em>índice do elemento do topo</em>. Como 0 é índice válido, precisamos de um valor fora da faixa para representar "vazia": -1.</p>
+<p>Sim, existe a versão alternativa em que <code>topo</code> guarda <strong>a quantidade de elementos</strong> (ou seja, a próxima posição livre). Aí:</p>
+<pre class="diag">
+   topo = índice do topo        topo = quantidade / próxima livre
+   -------------------------    ---------------------------------
+   inicializa: topo = -1        inicializa: topo = 0
+   vazia:      topo == -1       vazia:      topo == 0
+   cheia:      topo == MAX-1    cheia:      topo == MAX
+   push: topo++; d[topo]=v      push: d[topo]=v; topo++
+   pop:  x=d[topo]; topo--      pop:  topo--; x=d[topo]
+   top:  x = d[topo]            top:  x = d[topo-1]
+</pre>
+<p>As duas estão corretas — o que <strong>não</strong> pode é misturar as duas convenções no mesmo código. Repare que a ordem das operações em push/pop se inverte entre as versões.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 Médio — P3.</span> Escreva uma função que recebe uma pilha (implementação com vetor) e <strong>imprime seus elementos do topo para o fundo, sem alterar a pilha</strong>. Depois escreva uma segunda versão que só pode usar as operações do TAD (<code>push</code>, <code>pop</code>, <code>vazia</code>) e, mesmo assim, deixa a pilha como estava no final.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p><strong>Versão 1 — acesso direto ao vetor.</strong> Como estamos "dentro" da implementação, podemos varrer o vetor de trás para frente:</p>
+<pre><code>void imprime(Pilha *p) {
+    int i;
+    for (i = p-&gt;topo; i &gt;= 0; i--)
+        printf("%d ", p-&gt;dados[i]);
+}</code></pre>
+<p>Começa em <code>topo</code> (o topo) e desce até 0 (o fundo). Recebe ponteiro por eficiência, mas nada é alterado.</p>
+<p><strong>Versão 2 — só com o TAD.</strong> Aqui não podemos olhar o vetor. A saída é desempilhar tudo em uma pilha auxiliar e depois devolver:</p>
+<pre><code>void imprime_tad(Pilha *p) {
+    Pilha aux;
+    int x;
+    inicializa(&amp;aux);
+
+    while (pop(p, &amp;x)) {       /* esvazia p, imprimindo do topo pro fundo */
+        printf("%d ", x);
+        push(&amp;aux, x);         /* guarda na auxiliar (ordem invertida)    */
+    }
+    while (pop(&amp;aux, &amp;x))      /* devolve: inverte de novo = ordem original */
+        push(p, x);
+}</code></pre>
+<p>Por que funciona: passar de uma pilha para outra inverte a ordem. Fazendo isso <strong>duas vezes</strong>, a ordem original volta. Custo: Θ(n) de tempo e Θ(n) de espaço extra.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 Médio — P4.</span> Implemente <code>int tamanho(Pilha *p)</code> para a versão com <strong>lista ligada</strong>, sem alterar a pilha. Depois responda: como fazer essa operação virar Θ(1)?</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre><code>int tamanho(Pilha *p) {
+    int n = 0;
+    No *q = p-&gt;topo;          /* ponteiro auxiliar: NÃO mexa em p-&gt;topo */
+    while (q != NULL) {
+        n++;
+        q = q-&gt;prox;          /* anda para o próximo nó */
+    }
+    return n;
+}</code></pre>
+<p>Ponto crítico: usar <code>q</code> e não caminhar com <code>p-&gt;topo</code> diretamente. Se você fizesse <code>p-&gt;topo = p-&gt;topo-&gt;prox</code> no laço, ao terminar o topo seria NULL e a pilha inteira estaria perdida na memória.</p>
+<p>Isso é Θ(n), porque todo nó é visitado. Para virar Θ(1), basta guardar um contador na struct:</p>
+<pre><code>typedef struct { No *topo; int n; } Pilha;</code></pre>
+<p>E então <code>push</code> faz <code>p-&gt;n++</code>, <code>pop</code> faz <code>p-&gt;n--</code>, e <code>tamanho</code> só devolve <code>p-&gt;n</code>. Trocamos um pouco de espaço (um int) e uma linha a mais por operação por uma consulta instantânea — é o tipo de troca que o professor gosta de ver justificada.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n3">🔴 Difícil — P5.</span> Avalie uma expressão em <strong>notação pós-fixa</strong> com uma pilha. Exemplo: <code>"3 4 + 2 *"</code> vale 14. Assuma que os operandos são dígitos de 0 a 9 e os operadores são <code>+ - * /</code>, tudo separado por espaços. Escreva a função e explique <em>por que a ordem dos operandos importa</em> na subtração e na divisão.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p><strong>Ideia:</strong> percorra a expressão. Se o token é número, empilhe. Se é operador, desempilhe <strong>dois</strong>, aplique e empilhe o resultado. No fim, sobra um único valor na pilha: a resposta.</p>
+<pre><code>int avalia(const char *s) {
+    Pilha p;
+    int i, a, b;
+    inicializa(&amp;p);
+
+    for (i = 0; s[i] != '\0'; i++) {
+        if (s[i] == ' ') continue;
+
+        if (s[i] &gt;= '0' &amp;&amp; s[i] &lt;= '9') {
+            push(&amp;p, s[i] - '0');        /* char -&gt; int */
+        } else {
+            pop(&amp;p, &amp;b);                 /* PRIMEIRO a sair é o da DIREITA */
+            pop(&amp;p, &amp;a);                 /* o segundo é o da ESQUERDA      */
+            switch (s[i]) {
+                case '+': push(&amp;p, a + b); break;
+                case '-': push(&amp;p, a - b); break;
+                case '*': push(&amp;p, a * b); break;
+                case '/': push(&amp;p, a / b); break;
+            }
+        }
+    }
+    pop(&amp;p, &amp;a);
+    return a;
+}</code></pre>
+<p><strong>Por que a ordem importa:</strong> na expressão <code>"7 3 -"</code>, o 7 entrou primeiro e o 3 depois. Como a pilha é LIFO, o primeiro <code>pop</code> devolve <strong>3</strong> (o operando da direita) e o segundo devolve <strong>7</strong> (o da esquerda). Se você fizesse <code>push(&amp;p, b - a)</code>, obteria -4 em vez de 4. Em <code>+</code> e <code>*</code> o erro passa despercebido porque são comutativos — e é justamente por isso que a prova usa <code>-</code> ou <code>/</code>.</p>
+<pre class="diag">
+   "3 4 + 2 *"
+   '3' push       [3]
+   '4' push       [3][4]
+   '+' pop b=4, pop a=3, push 3+4   [7]
+   '2' push       [7][2]
+   '*' pop b=2, pop a=7, push 7*2   [14]
+   resultado: 14
+</pre>
+<p>Detalhe do <code>s[i] - '0'</code>: caracteres de dígito são consecutivos na tabela ASCII, então subtrair <code>'0'</code> converte o caractere no número correspondente.</p>
+</div></details>
+</div>
+
+<div class="resumo">
+  <h4>Resumo do capítulo 2</h4>
+  <ul>
+    <li>Pilha = LIFO. Insere e remove só no topo.</li>
+    <li>Vetor: <code>topo</code> é índice, começa em -1; push sobe e escreve, pop lê e desce.</li>
+    <li>Lista ligada: <code>topo</code> é ponteiro, começa NULL; push é <code>novo-&gt;prox = topo; topo = novo;</code> nessa ordem.</li>
+    <li>pop guarda o nó em <code>aux</code>, move o topo, e só então dá <code>free</code>.</li>
+    <li>Todas as operações principais são Θ(1) nas duas versões.</li>
+    <li>Usos típicos: inverter ordem, desfazer, casar aberturas/fechamentos, avaliar pós-fixa, recursão.</li>
+  </ul>
+</div>
+
+<h2 id="cap3">3. Filas</h2>
+
+<h3>3.1 A ideia intuitiva</h3>
+
+<p>A fila do banco: quem chega entra no fim, quem é atendido sai do começo. Ninguém fura. Formalmente, uma <strong>fila</strong> é uma coleção em que a inserção acontece em uma extremidade (o <strong>fim</strong>) e a remoção na outra (o <strong>início</strong>). A política é <strong>FIFO</strong> — <em>First In, First Out</em>.</p>
+
+<pre class="diag">
+   sai daqui                              entra aqui
+   (início / frente)                      (fim / trás)
+      |                                       |
+      v                                       v
+    [ 10 ][ 20 ][ 30 ][ 40 ]  &lt;---- enqueue(50)
+      ^
+   dequeue() devolve 10
+</pre>
+
+<div class="nota">
+  <span class="rotulo">Vocabulário</span>
+  <p>O mesmo conceito aparece com nomes diferentes nos livros: <em>início</em> = frente = <code>inicio</code> = <code>front</code> = <code>head</code>; <em>fim</em> = trás = <code>fim</code> = <code>rear</code> = <code>tail</code>. Inserir é <code>enqueue</code> (ou enfileirar); remover é <code>dequeue</code> (ou desenfileirar).</p>
+</div>
+
+<h3>3.2 A diferença entre início e fim (o ponto que confunde)</h3>
+
+<p>Na pilha existe <strong>um</strong> ponto de acesso; na fila existem <strong>dois</strong>, e cada um serve para uma coisa só:</p>
+
+<div class="tabela">
+<table>
+<thead><tr><th></th><th>Início (frente)</th><th>Fim (trás)</th></tr></thead>
+<tbody>
+<tr><td>O que é</td><td>o elemento mais antigo</td><td>o elemento mais recente</td></tr>
+<tr><td>Quem mexe</td><td><code>dequeue</code> (sai)</td><td><code>enqueue</code> (entra)</td></tr>
+<tr><td>Consulta</td><td><code>frente()</code> — o próximo a ser atendido</td><td><code>fim()</code> — o último que chegou</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Confundir os dois é o erro número 1 de fila: se você inserir no início e remover do início, acabou de escrever uma pilha.</p>
+
+<h3>3.3 Para que serve</h3>
+
+<ul>
+  <li><strong>Fila de impressão</strong> — o primeiro documento enviado imprime primeiro.</li>
+  <li><strong>Escalonamento de processos</strong> no sistema operacional; atendimento em call center.</li>
+  <li><strong>Buffer</strong> de dados: quem produz e quem consome em ritmos diferentes.</li>
+  <li><strong>Busca em largura (BFS)</strong> em grafos e árvores — o percurso por nível usa fila. Isso volta na aula de grafos e no percurso em árvore.</li>
+</ul>
+
+<h3>3.4 Implementação com vetor — e o problema do "andar para a direita"</h3>
+
+<p>A tentativa ingênua: um vetor com dois índices, <code>inicio</code> e <code>fim</code>. Insere no fim e incrementa <code>fim</code>; remove do início e incrementa <code>inicio</code>. Funciona... por um tempo:</p>
+
+<pre class="diag">
+   MAX = 5
+
+   após 5 enqueues e 3 dequeues:
+
+   índice:   0     1     2     3     4
+           +-----+-----+-----+-----+-----+
+           |  x  |  x  |  30 |  40 |  50 |
+           +-----+-----+-----+-----+-----+
+                          ^                 ^
+                       inicio=2           fim=5
+
+   Só há 3 elementos, mas fim chegou ao limite:
+   um novo enqueue seria recusado, com 2 posições livres no começo!
+</pre>
+
+<p>A fila "anda" pelo vetor e desperdiça as posições já usadas. Duas soluções:</p>
+
+<ol>
+  <li><strong>Deslocar tudo a cada remoção</strong> — mantém <code>inicio = 0</code> sempre, mas cada <code>dequeue</code> custa Θ(n). Ruim.</li>
+  <li><strong>Fila circular</strong> — quando um índice passa do fim do vetor, ele volta para a posição 0. Custo Θ(1). É a solução padrão.</li>
+</ol>
+
+<h4>A ideia da fila circular</h4>
+
+<p>Imagine o vetor dobrado em um anel: depois da posição <code>MAX-1</code> vem a posição 0. O operador que faz essa mágica é o resto da divisão:</p>
+
+<pre class="diag">
+   proximo = (atual + 1) % MAX
+
+   MAX = 5:  (0+1)%5=1   (3+1)%5=4   (4+1)%5=0   &lt;- deu a volta
+
+                   [0]
+              [4]       [1]
+                   ...
+              [3]       [2]
+</pre>
+
+<h4>Representação: início + quantidade</h4>
+
+<p>Existe uma armadilha clássica em fila circular: guardando <code>inicio</code> e <code>fim</code>, a condição "fila cheia" e "fila vazia" ficam <em>idênticas</em> (<code>inicio == fim</code>) e você não consegue distinguir. A saída mais limpa é guardar <strong>início e quantidade</strong>:</p>
+
+<pre><code><span class="c">#define MAX 100</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> {
+    <span class="k">int</span> dados[MAX];
+    <span class="k">int</span> inicio;   <span class="c">/* índice do primeiro elemento */</span>
+    <span class="k">int</span> qtd;      <span class="c">/* quantos elementos existem    */</span>
+} Fila;
+</code></pre>
+
+<p>Com isso, o índice do fim é calculado quando precisa: <code>(inicio + qtd) % MAX</code> é a primeira posição livre.</p>
+
+<pre><code><span class="k">void</span> inicializa(Fila *f) {
+    f-&gt;inicio = <span class="s">0</span>;
+    f-&gt;qtd    = <span class="s">0</span>;
+}
+
+<span class="k">int</span> vazia(Fila *f) { <span class="k">return</span> f-&gt;qtd == <span class="s">0</span>; }
+<span class="k">int</span> cheia(Fila *f) { <span class="k">return</span> f-&gt;qtd == MAX; }
+
+<span class="k">int</span> enqueue(Fila *f, <span class="k">int</span> v) {
+    <span class="k">int</span> fim;
+    <span class="k">if</span> (cheia(f)) <span class="k">return</span> <span class="s">0</span>;
+    fim = (f-&gt;inicio + f-&gt;qtd) % MAX;   <span class="c">/* 1ª posição livre     */</span>
+    f-&gt;dados[fim] = v;                  <span class="c">/* escreve no fim       */</span>
+    f-&gt;qtd++;                           <span class="c">/* a fila cresceu       */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+
+<span class="k">int</span> dequeue(Fila *f, <span class="k">int</span> *saida) {
+    <span class="k">if</span> (vazia(f)) <span class="k">return</span> <span class="s">0</span>;
+    *saida = f-&gt;dados[f-&gt;inicio];            <span class="c">/* 1) lê o mais antigo  */</span>
+    f-&gt;inicio = (f-&gt;inicio + <span class="s">1</span>) % MAX;      <span class="c">/* 2) avança circular   */</span>
+    f-&gt;qtd--;                                <span class="c">/* 3) a fila encolheu   */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+
+<span class="k">int</span> frente(Fila *f, <span class="k">int</span> *saida) {
+    <span class="k">if</span> (vazia(f)) <span class="k">return</span> <span class="s">0</span>;
+    *saida = f-&gt;dados[f-&gt;inicio];   <span class="c">/* só lê */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+</code></pre>
+
+<p>Por que isso resolve tudo: <code>qtd == 0</code> é vazia e <code>qtd == MAX</code> é cheia, sem ambiguidade nenhuma. E o <code>% MAX</code> aparece em exatamente dois lugares — no cálculo do fim e no avanço do início.</p>
+
+<div class="dica">
+  <span class="rotulo">Se o professor usou <code>inicio</code> e <code>fim</code></span>
+  <p>Também é comum a versão com dois índices sacrificando uma posição do vetor: a fila é considerada cheia quando <code>(fim + 1) % MAX == inicio</code>, o que deixa sempre uma casa vazia para diferenciar de <code>inicio == fim</code> (vazia). É correta, só cabe <code>MAX-1</code> elementos. Saiba reconhecer as duas.</p>
+</div>
+
+<h4>Rastreando uma fila circular pequena</h4>
+
+<pre class="diag">
+   MAX = 4, fila vazia: inicio=0, qtd=0
+
+   enqueue(10)  fim=(0+0)%4=0  d[0]=10   inicio=0 qtd=1   [10][ ][ ][ ]
+   enqueue(20)  fim=(0+1)%4=1  d[1]=20   inicio=0 qtd=2   [10][20][ ][ ]
+   enqueue(30)  fim=(0+2)%4=2  d[2]=30   inicio=0 qtd=3   [10][20][30][ ]
+   dequeue -&gt; 10                         inicio=1 qtd=2   [__][20][30][ ]
+   enqueue(40)  fim=(1+2)%4=3  d[3]=40   inicio=1 qtd=3   [__][20][30][40]
+   enqueue(50)  fim=(1+3)%4=0  d[0]=50   inicio=1 qtd=4   [50][20][30][40]
+                                          ^ deu a volta e ocupou a casa livre
+   enqueue(60)  qtd==MAX -&gt; recusa (retorna 0)
+   dequeue -&gt; 20                         inicio=2 qtd=3
+</pre>
+
+<h3>3.5 Implementação com lista ligada</h3>
+
+<p>Sem limite de tamanho e sem aritmética circular. A diferença em relação à pilha: precisamos guardar <strong>dois</strong> ponteiros, porque mexemos nas duas pontas.</p>
+
+<pre><code><span class="k">typedef</span> <span class="k">struct</span> No {
+    <span class="k">int</span> info;
+    <span class="k">struct</span> No *prox;
+} No;
+
+<span class="k">typedef</span> <span class="k">struct</span> {
+    No *inicio;   <span class="c">/* de onde sai (dequeue) */</span>
+    No *fim;      <span class="c">/* onde entra (enqueue)  */</span>
+} Fila;
+</code></pre>
+
+<pre class="diag">
+   inicio                                     fim
+     |                                         |
+     v                                         v
+   +----+----+   +----+----+   +----+----+
+   | 10 |  *-+--&gt;| 20 |  *-+--&gt;| 30 |NULL|
+   +----+----+   +----+----+   +----+----+
+
+   Atenção ao sentido das setas: elas apontam do início para o fim.
+   Por isso dá para remover do início em Θ(1) (basta andar uma casa)
+   e inserir no fim em Θ(1) (porque guardamos o ponteiro 'fim').
+</pre>
+
+<h4>enqueue: inserir no fim</h4>
+
+<pre><code><span class="k">int</span> enqueue(Fila *f, <span class="k">int</span> v) {
+    No *novo = (No*) malloc(<span class="k">sizeof</span>(No));
+    <span class="k">if</span> (novo == NULL) <span class="k">return</span> <span class="s">0</span>;
+
+    novo-&gt;info = v;
+    novo-&gt;prox = NULL;              <span class="c">/* ele será o último */</span>
+
+    <span class="k">if</span> (f-&gt;inicio == NULL)          <span class="c">/* fila estava vazia:            */</span>
+        f-&gt;inicio = novo;           <span class="c">/* o novo é início E fim         */</span>
+    <span class="k">else</span>
+        f-&gt;fim-&gt;prox = novo;        <span class="c">/* engata depois do último atual  */</span>
+
+    f-&gt;fim = novo;                  <span class="c">/* nos dois casos, fim = novo     */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+</code></pre>
+
+<p>O <code>if</code> aqui é <strong>necessário</strong> (diferente do push da pilha, que não precisava de caso especial). Motivo: se a fila está vazia, <code>f-&gt;fim</code> é NULL, e <code>f-&gt;fim-&gt;prox = novo</code> seria desreferenciar NULL — segmentation fault na hora.</p>
+
+<pre class="diag">
+   Fila vazia:                Fila com elementos:
+   inicio=NULL  fim=NULL      inicio -&gt; [10] -&gt; [20] &lt;- fim
+
+   novo=[30]                  novo=[30]
+   inicio = novo              fim-&gt;prox = novo:
+   fim    = novo                inicio -&gt; [10] -&gt; [20] -&gt; [30]
+   inicio -&gt; [30] &lt;- fim      fim = novo:
+                                inicio -&gt; [10] -&gt; [20] -&gt; [30] &lt;- fim
+</pre>
+
+<h4>dequeue: remover do início</h4>
+
+<pre><code><span class="k">int</span> dequeue(Fila *f, <span class="k">int</span> *saida) {
+    No *aux;
+    <span class="k">if</span> (f-&gt;inicio == NULL) <span class="k">return</span> <span class="s">0</span>;
+
+    aux       = f-&gt;inicio;       <span class="c">/* 1) guarda quem sai         */</span>
+    *saida    = aux-&gt;info;       <span class="c">/* 2) copia o valor           */</span>
+    f-&gt;inicio = aux-&gt;prox;       <span class="c">/* 3) início anda uma casa    */</span>
+
+    <span class="k">if</span> (f-&gt;inicio == NULL)       <span class="c">/* 4) saiu o último elemento? */</span>
+        f-&gt;fim = NULL;           <span class="c">/*    então fim também zera   */</span>
+
+    free(aux);                   <span class="c">/* 5) libera                  */</span>
+    <span class="k">return</span> <span class="s">1</span>;
+}
+</code></pre>
+
+<div class="alerta">
+  <span class="rotulo">O passo 4 é a pegadinha favorita da fila encadeada</span>
+  <p>Se você esquecer de zerar <code>f-&gt;fim</code> ao remover o último elemento, ele continua apontando para um nó que acabou de ser liberado. No próximo <code>enqueue</code>, a fila parece vazia (<code>inicio == NULL</code>), então o código vai pelo ramo do <code>if</code>... mas em outra implementação que teste vazia por <code>fim</code>, ou que use <code>fim-&gt;prox</code>, você escreve em memória liberada. É um bug silencioso — o programa pode até "funcionar" e quebrar depois.</p>
+</div>
+
+<h3>3.6 Exemplos práticos</h3>
+
+<h4>Exemplo 1 — atendimento simples</h4>
+
+<p><strong>Problema:</strong> três clientes chegam (senhas 101, 102, 103) e dois são atendidos. Quem está na frente depois?</p>
+
+<pre><code><span class="k">int</span> main(<span class="k">void</span>) {
+    Fila f;
+    <span class="k">int</span> x;
+    inicializa(&amp;f);
+
+    enqueue(&amp;f, <span class="s">101</span>);
+    enqueue(&amp;f, <span class="s">102</span>);
+    enqueue(&amp;f, <span class="s">103</span>);
+
+    dequeue(&amp;f, &amp;x);  printf(<span class="s">"atendido: %d\n"</span>, x);
+    dequeue(&amp;f, &amp;x);  printf(<span class="s">"atendido: %d\n"</span>, x);
+    frente(&amp;f, &amp;x);   printf(<span class="s">"na frente: %d\n"</span>, x);
+    <span class="k">return</span> <span class="s">0</span>;
+}
+</code></pre>
+
+<pre class="diag">
+   enqueue(101)   inicio -&gt; [101] &lt;- fim
+   enqueue(102)   inicio -&gt; [101] -&gt; [102] &lt;- fim
+   enqueue(103)   inicio -&gt; [101] -&gt; [102] -&gt; [103] &lt;- fim
+   dequeue -&gt; 101 inicio -&gt; [102] -&gt; [103] &lt;- fim
+   dequeue -&gt; 102 inicio -&gt; [103] &lt;- fim
+   frente  -&gt; 103 (nada muda)
+
+   Saída: atendido 101 / atendido 102 / na frente 103
+</pre>
+
+<h4>Exemplo 2 — imprimir e devolver (percorrer sem destruir)</h4>
+
+<p><strong>Problema:</strong> imprimir a fila do início ao fim usando só o TAD, deixando-a como estava.</p>
+<p><strong>Lógica:</strong> ao contrário da pilha, a fila <em>preserva</em> a ordem quando você passa todos os elementos por ela. Então basta remover da frente e reinserir no fim, exatamente <code>n</code> vezes.</p>
+
+<pre><code><span class="k">void</span> imprime(Fila *f, <span class="k">int</span> n) {   <span class="c">/* n = quantidade de elementos */</span>
+    <span class="k">int</span> i, x;
+    <span class="k">for</span> (i = <span class="s">0</span>; i &lt; n; i++) {
+        dequeue(f, &amp;x);
+        printf(<span class="s">"%d "</span>, x);
+        enqueue(f, x);      <span class="c">/* volta para o fim */</span>
+    }
+}
+</code></pre>
+
+<pre class="diag">
+   [10][20][30]  -&gt; deq 10, imprime, enq 10  -&gt; [20][30][10]
+                 -&gt; deq 20, imprime, enq 20  -&gt; [30][10][20]
+                 -&gt; deq 30, imprime, enq 30  -&gt; [10][20][30]  (voltou!)
+</pre>
+
+<p>Depois de <code>n</code> rodadas, a fila está idêntica. Com a pilha, o mesmo truque precisava de estrutura auxiliar; com a fila, a rotação resolve. Cuidado: o laço precisa ser limitado por <code>n</code>, senão ele gira para sempre.</p>
+
+<h4>Exemplo 3 — o problema de Josephus (eliminação circular)</h4>
+
+<p><strong>Problema:</strong> <code>n</code> pessoas em círculo, numeradas 1..n. Conta-se de <code>k</code> em <code>k</code> e quem cai na contagem sai. Quem sobra?</p>
+<p><strong>Lógica:</strong> "voltar para o fim da fila" é o mesmo que "continuar no círculo". Então: <code>k-1</code> pessoas são rodadas (sai da frente, volta pro fim) e a <code>k</code>-ésima é removida de vez. Repete até sobrar uma.</p>
+
+<pre><code><span class="k">int</span> josephus(<span class="k">int</span> n, <span class="k">int</span> k) {
+    Fila f;
+    <span class="k">int</span> i, x;
+    inicializa(&amp;f);
+
+    <span class="k">for</span> (i = <span class="s">1</span>; i &lt;= n; i++) enqueue(&amp;f, i);
+
+    <span class="k">while</span> (n &gt; <span class="s">1</span>) {
+        <span class="k">for</span> (i = <span class="s">0</span>; i &lt; k - <span class="s">1</span>; i++) {   <span class="c">/* k-1 sobreviventes rodam */</span>
+            dequeue(&amp;f, &amp;x);
+            enqueue(&amp;f, x);
+        }
+        dequeue(&amp;f, &amp;x);                 <span class="c">/* o k-ésimo é eliminado   */</span>
+        n--;
+    }
+    dequeue(&amp;f, &amp;x);
+    <span class="k">return</span> x;
+}
+</code></pre>
+
+<pre class="diag">
+   n=5, k=2:
+   [1][2][3][4][5]  roda 1: [2][3][4][5][1]  elimina 2 -&gt; [3][4][5][1]
+                    roda 3: [4][5][1][3]     elimina 4 -&gt; [5][1][3]
+                    roda 5: [1][3][5]        elimina 1 -&gt; [3][5]
+                    roda 3: [5][3]           elimina 5 -&gt; [3]
+   sobrevivente: 3
+</pre>
+
+<h3>3.7 Complexidade</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Operação</th><th>Vetor circular</th><th>Lista ligada</th><th>Vetor "andando" (ingênuo)</th></tr></thead>
+<tbody>
+<tr><td>enqueue</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1), mas desperdiça espaço</td></tr>
+<tr><td>dequeue</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(n) se deslocar o vetor</td></tr>
+<tr><td>frente / fim</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1)</td></tr>
+<tr><td>vazia / cheia</td><td>Θ(1)</td><td>Θ(1) / não enche</td><td>Θ(1)</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Note que a fila encadeada só é Θ(1) no <code>enqueue</code> <strong>porque guardamos o ponteiro <code>fim</code></strong>. Sem ele, inserir no fim exigiria percorrer a lista toda: Θ(n).</p>
+
+<h3>3.8 Exercícios de fila</h3>
+
+<div class="ex">
+<p><span class="nivel n1">🟢 Fácil — F1.</span> Fila circular com <code>MAX = 5</code>, campos <code>inicio</code> e <code>qtd</code>. Partindo de vazia, execute: <code>enq(1) enq(2) enq(3) deq() deq() enq(4) enq(5) enq(6) enq(7)</code>. Diga, no fim: valor de <code>inicio</code>, de <code>qtd</code>, o conteúdo do vetor por posição e quem está na frente.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre class="diag">
+   op        fim=(inicio+qtd)%5   vetor              inicio  qtd
+   enq(1)    (0+0)%5 = 0          [1][ ][ ][ ][ ]      0      1
+   enq(2)    (0+1)%5 = 1          [1][2][ ][ ][ ]      0      2
+   enq(3)    (0+2)%5 = 2          [1][2][3][ ][ ]      0      3
+   deq -&gt; 1                       [_][2][3][ ][ ]      1      2
+   deq -&gt; 2                       [_][_][3][ ][ ]      2      1
+   enq(4)    (2+1)%5 = 3          [_][_][3][4][ ]      2      2
+   enq(5)    (2+2)%5 = 4          [_][_][3][4][5]      2      3
+   enq(6)    (2+3)%5 = 0          [6][_][3][4][5]      2      4
+   enq(7)    (2+4)%5 = 1          [6][7][3][4][5]      2      5
+</pre>
+<p><code>inicio = 2</code>, <code>qtd = 5</code> (fila cheia), vetor <code>[6][7][3][4][5]</code>, na frente está o <strong>3</strong>.</p>
+<p>A ordem lógica da fila é 3, 4, 5, 6, 7 — lendo o vetor a partir de <code>inicio</code> e dando a volta. O conteúdo "fora de ordem" no vetor é normal e esperado numa fila circular.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n1">🟢 Fácil — F2.</span> Por que uma fila encadeada precisa de dois ponteiros (<code>inicio</code> e <code>fim</code>) enquanto a pilha encadeada precisa de apenas um? E se as setas dos nós apontassem do fim para o início, o que mudaria?</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p>A pilha mexe em uma extremidade só, então um ponteiro (topo) basta. A fila mexe nas duas: remove no início e insere no fim. Você até poderia guardar só o <code>inicio</code>, mas cada <code>enqueue</code> teria que percorrer a lista até o último nó — Θ(n) em vez de Θ(1). O ponteiro <code>fim</code> é um atalho que compra tempo constante.</p>
+<p>Se as setas apontassem do fim para o início, o <code>enqueue</code> (inserir no fim) continuaria fácil, mas o <code>dequeue</code> ficaria caro: para remover o nó do início, seria preciso achar quem aponta para ele — e, com setas nesse sentido, isso exige varrer tudo, Θ(n). Por isso o encadeamento correto é sempre <em>início → fim</em>.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 Médio — F3.</span> Implemente <code>int fim_valor(Fila *f, int *saida)</code> nas duas versões (vetor circular e lista ligada): devolve o último elemento inserido sem removê-lo.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p><strong>Vetor circular.</strong> A primeira posição livre é <code>(inicio + qtd) % MAX</code>, então o último elemento está uma posição antes dela:</p>
+<pre><code>int fim_valor(Fila *f, int *saida) {
+    int idx;
+    if (vazia(f)) return 0;
+    idx = (f-&gt;inicio + f-&gt;qtd - 1) % MAX;
+    *saida = f-&gt;dados[idx];
+    return 1;
+}</code></pre>
+<p>Por que não <code>idx - 1</code> direto? Porque se a primeira livre é 0, o último está em <code>MAX-1</code>, e só o <code>%</code> faz essa volta. Como testamos <code>vazia</code> antes, <code>qtd &gt;= 1</code> e a conta nunca fica negativa.</p>
+<p><strong>Lista ligada.</strong> Trivial, porque guardamos o ponteiro:</p>
+<pre><code>int fim_valor(Fila *f, int *saida) {
+    if (f-&gt;fim == NULL) return 0;
+    *saida = f-&gt;fim-&gt;info;
+    return 1;
+}</code></pre>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 Médio — F4.</span> Escreva uma função que <strong>inverte</strong> o conteúdo de uma fila, usando uma pilha auxiliar. Só é permitido usar as operações do TAD das duas estruturas.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre><code>void inverte_fila(Fila *f) {
+    Pilha p;
+    int x;
+    inicializa_pilha(&amp;p);
+
+    while (dequeue(f, &amp;x))      /* esvazia a fila para dentro da pilha */
+        push(&amp;p, x);
+
+    while (pop(&amp;p, &amp;x))          /* devolve: a pilha inverte a ordem   */
+        enqueue(f, x);
+}</code></pre>
+<p><strong>Por que funciona:</strong> saindo da fila, os elementos vêm na ordem 10, 20, 30. Empilhados nessa ordem, o topo fica sendo o 30. Ao desempilhar, saem 30, 20, 10 — e cada um vai para o fim da fila, montando a ordem invertida.</p>
+<pre class="diag">
+   fila:  [10][20][30]
+   -&gt; pilha (topo em cima):  30
+                             20
+                             10
+   -&gt; fila:  [30][20][10]
+</pre>
+<p>Custo: Θ(n) de tempo e Θ(n) de espaço. É o exercício que mostra na prática que pilha inverte e fila preserva.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n3">🔴 Difícil — F5.</span> Implemente uma <strong>pilha usando duas filas</strong>: as funções <code>push</code>, <code>pop</code> e <code>vazia</code> devem respeitar LIFO, mas por dentro você só pode usar <code>enqueue</code>, <code>dequeue</code> e <code>vazia</code> de filas. Qual o custo de cada operação?</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p><strong>Ideia:</strong> a fila entrega o mais antigo, mas queremos o mais recente. A saída é fazer o elemento recém-inserido "ir para a frente". Estratégia com push caro:</p>
+<ol>
+  <li>Insere o novo elemento na fila auxiliar <code>f2</code> (que está vazia).</li>
+  <li>Transfere todo mundo de <code>f1</code> para <code>f2</code>, na ordem.</li>
+  <li>Troca os papéis de <code>f1</code> e <code>f2</code>.</li>
+</ol>
+<p>O resultado é que <code>f1</code> sempre tem o elemento mais recente na frente, e o <code>pop</code> vira um simples <code>dequeue</code>.</p>
+<pre><code>typedef struct { Fila f1, f2; } PilhaDeFilas;
+
+void push(PilhaDeFilas *p, int v) {
+    int x;
+    enqueue(&amp;p-&gt;f2, v);                  /* o novo entra sozinho na f2 */
+    while (dequeue(&amp;p-&gt;f1, &amp;x))          /* todos os antigos vão atrás */
+        enqueue(&amp;p-&gt;f2, x);
+    troca(&amp;p-&gt;f1, &amp;p-&gt;f2);               /* f2 vira a principal        */
+}
+
+int pop(PilhaDeFilas *p, int *saida) {
+    return dequeue(&amp;p-&gt;f1, saida);
+}
+
+int vazia(PilhaDeFilas *p) {
+    return fila_vazia(&amp;p-&gt;f1);
+}</code></pre>
+<pre class="diag">
+   push(10): f2=[10]                  troca -&gt; f1=[10]
+   push(20): f2=[20], move 10         f2=[20][10]  troca -&gt; f1=[20][10]
+   push(30): f2=[30], move 20,10      f2=[30][20][10]      f1=[30][20][10]
+   pop -&gt; dequeue -&gt; 30   (LIFO, correto!)
+</pre>
+<p><strong>Custos:</strong> <code>push</code> é Θ(n), porque move todos os elementos; <code>pop</code> e <code>vazia</code> são Θ(1). Existe a estratégia simétrica (push Θ(1) e pop Θ(n), transferindo n-1 elementos na remoção). O ponto do exercício é perceber que, para transformar FIFO em LIFO, alguém tem que pagar Θ(n) em algum lugar.</p>
+</div></details>
+</div>
+
+<div class="resumo">
+  <h4>Resumo do capítulo 3</h4>
+  <ul>
+    <li>Fila = FIFO. Entra no fim (<code>enqueue</code>), sai do início (<code>dequeue</code>).</li>
+    <li>Com vetor, use a forma <strong>circular</strong>: <code>(indice + 1) % MAX</code>; guardar <code>inicio</code> + <code>qtd</code> elimina a ambiguidade entre vazia e cheia.</li>
+    <li>Com lista ligada, dois ponteiros: <code>inicio</code> e <code>fim</code>. As setas vão do início para o fim.</li>
+    <li><code>enqueue</code> precisa do <code>if</code> de fila vazia; <code>dequeue</code> precisa zerar <code>fim</code> quando sai o último.</li>
+    <li>Todas as operações são Θ(1) nas duas implementações bem-feitas.</li>
+    <li>Pilha inverte a ordem; fila preserva. Isso decide qual usar.</li>
+  </ul>
+</div>
+
+<h2 id="cap4">4. Listas ligadas</h2>
+
+<h3>4.1 A ideia intuitiva</h3>
+
+<p>Uma caça ao tesouro: você recebe um bilhete com uma informação e o endereço do próximo bilhete. Chega lá, lê a informação, pega o endereço seguinte, e assim por diante até um bilhete que diz "acabou". Os bilhetes podem estar espalhados pela cidade inteira — o que os mantém em ordem não é a posição, é o endereço que cada um carrega.</p>
+
+<p>Uma <strong>lista ligada</strong> (ou encadeada) é isso: uma sequência de <strong>nós</strong>, cada um com um dado e o endereço do próximo. O último aponta para <code>NULL</code>, que é o "acabou".</p>
+
+<pre class="diag">
+   lista
+     |
+     v
+   +----+----+   +----+----+   +----+----+
+   | 10 |  *-+--&gt;| 20 |  *-+--&gt;| 30 |NULL|
+   +----+----+   +----+----+   +----+----+
+    info prox
+
+   Forma compacta que usaremos daqui pra frente:
+   [10] -&gt; [20] -&gt; [30] -&gt; NULL
+</pre>
+
+<h3>4.2 Que problema ela resolve</h3>
+
+<p>O vetor tem dois defeitos difíceis de contornar:</p>
+
+<ol>
+  <li><strong>Tamanho fixo.</strong> Você precisa decidir <code>MAX</code> antes de rodar. Chuta alto e desperdiça memória; chuta baixo e estoura.</li>
+  <li><strong>Inserção e remoção no meio custam caro.</strong> Para inserir na posição 0 de um vetor com <code>n</code> elementos, é preciso empurrar todos os <code>n</code> uma casa para a direita: Θ(n).</li>
+</ol>
+
+<pre class="diag">
+   VETOR: inserir 5 no início              LISTA: inserir 5 no início
+   [10][20][30][ ]                         [10]-&gt;[20]-&gt;[30]-&gt;NULL
+       desloca tudo -&gt;                     cria [5], aponta para [10],
+   [ ][10][20][30]                         muda a cabeça:
+   [5][10][20][30]     Θ(n)                [5]-&gt;[10]-&gt;[20]-&gt;[30]  Θ(1)
+</pre>
+
+<p>A lista ligada cresce sob demanda (um <code>malloc</code> por nó) e insere/remove em tempo constante <em>desde que você já esteja com o ponteiro na posição certa</em>. Em troca, ela perde o acesso direto: não existe <code>lista[7]</code>, só dá para chegar no sétimo nó andando do primeiro até ele.</p>
+
+<h3>4.3 O nó e a cabeça da lista</h3>
+
+<pre><code><span class="k">typedef</span> <span class="k">struct</span> No {
+    <span class="k">int</span> info;              <span class="c">/* o dado guardado           */</span>
+    <span class="k">struct</span> No *prox;       <span class="c">/* endereço do próximo nó     */</span>
+} No;                      <span class="c">/* prox = NULL no último nó  */</span>
+</code></pre>
+
+<p>A lista inteira é representada por <strong>um ponteiro para o primeiro nó</strong> — a <em>cabeça</em>. Uma lista vazia é simplesmente a cabeça valendo NULL:</p>
+
+<pre><code>No *lista = NULL;      <span class="c">/* lista vazia */</span>
+
+<span class="k">int</span> vazia(No *l) {
+    <span class="k">return</span> l == NULL;
+}
+</code></pre>
+
+<div class="nota">
+  <span class="rotulo">Duas convenções para as funções que alteram a lista</span>
+  <p><strong>(a) Retornando a nova cabeça:</strong> <code>No* insere_inicio(No *l, int v)</code>, usada como <code>lista = insere_inicio(lista, 5);</code>. É a mais comum em livros de C e a que usaremos aqui.</p>
+  <p><strong>(b) Recebendo ponteiro para ponteiro:</strong> <code>void insere_inicio(No **l, int v)</code>, usada como <code>insere_inicio(&amp;lista, 5);</code>. Necessária quando a função precisa mudar a cabeça sem retorná-la.</p>
+  <p>As duas existem pelo mesmo motivo: <strong>quem insere no início ou remove o primeiro nó muda o valor da cabeça</strong>, e uma função C não consegue alterar o argumento do chamador sem uma dessas duas saídas. Saiba explicar isso — é pergunta de prova.</p>
+</div>
+
+<h3>4.4 Percurso: a operação-mãe</h3>
+
+<p>Quase toda função de lista é uma variação deste laço. Aprenda-o de cor:</p>
+
+<pre><code><span class="k">void</span> imprime(No *l) {
+    No *p;
+    <span class="k">for</span> (p = l; p != NULL; p = p-&gt;prox)
+        printf(<span class="s">"[%d] -&gt; "</span>, p-&gt;info);
+    printf(<span class="s">"NULL\n"</span>);
+}
+</code></pre>
+
+<p>Linha por linha:</p>
+
+<ul>
+  <li><code>p = l</code> — o ponteiro auxiliar começa na cabeça. <strong>Nunca</strong> caminhe usando <code>l</code> diretamente se você ainda precisa da lista.</li>
+  <li><code>p != NULL</code> — condição de parada. NULL é o fim; testar isso é o que impede o acesso inválido.</li>
+  <li><code>p = p-&gt;prox</code> — o passo. É literalmente "siga a seta".</li>
+</ul>
+
+<pre class="diag">
+   p            p            p            p
+   |            |            |            |
+   v            v            v            v
+  [10]  -&gt;     [20]  -&gt;     [30]  -&gt;    NULL   (o laço para aqui)
+</pre>
+
+<div class="alerta">
+  <span class="rotulo">Confusão clássica: <code>p != NULL</code> ou <code>p-&gt;prox != NULL</code>?</span>
+  <p>Use <code>p != NULL</code> quando quiser visitar <strong>todos</strong> os nós. Use <code>p-&gt;prox != NULL</code> quando quiser parar <strong>no último nó</strong> (por exemplo, para inserir depois dele). No segundo caso, a lista vazia tem que ser tratada antes, senão <code>p-&gt;prox</code> explode com <code>p</code> valendo NULL.</p>
+</div>
+
+<h3>4.5 Inserção no início — Θ(1)</h3>
+
+<pre><code>No* insere_inicio(No *l, <span class="k">int</span> v) {
+    No *novo = (No*) malloc(<span class="k">sizeof</span>(No));
+    <span class="k">if</span> (novo == NULL) <span class="k">return</span> l;   <span class="c">/* sem memória: lista intacta */</span>
+
+    novo-&gt;info = v;
+    novo-&gt;prox = l;     <span class="c">/* o novo aponta para a antiga cabeça */</span>
+    <span class="k">return</span> novo;        <span class="c">/* o novo É a nova cabeça             */</span>
+}
+</code></pre>
+
+<pre class="diag">
+   antes:   l -&gt; [10] -&gt; [20] -&gt; NULL      novo = [5]
+
+   (1) novo-&gt;prox = l:
+            [5] -&gt; [10] -&gt; [20] -&gt; NULL
+             ^
+            novo         l ainda aponta pro [10]
+
+   (2) return novo  ... e o chamador faz  lista = novo:
+            lista -&gt; [5] -&gt; [10] -&gt; [20] -&gt; NULL
+</pre>
+
+<p>Lista vazia funciona sem <code>if</code>: <code>l</code> é NULL, então <code>novo-&gt;prox = NULL</code> e a lista passa a ter um nó só. É o mesmo raciocínio do <code>push</code> da pilha encadeada — na verdade, <strong>uma pilha encadeada é exatamente uma lista com inserção e remoção só no início</strong>.</p>
+
+<h3>4.6 Inserção no final — Θ(n)</h3>
+
+<p>Aqui precisamos achar o último nó antes de engatar. E o último nó é aquele cujo <code>prox</code> é NULL.</p>
+
+<pre><code>No* insere_fim(No *l, <span class="k">int</span> v) {
+    No *p;
+    No *novo = (No*) malloc(<span class="k">sizeof</span>(No));
+    <span class="k">if</span> (novo == NULL) <span class="k">return</span> l;
+
+    novo-&gt;info = v;
+    novo-&gt;prox = NULL;              <span class="c">/* ele vai ser o último */</span>
+
+    <span class="k">if</span> (l == NULL) <span class="k">return</span> novo;   <span class="c">/* lista vazia: novo vira a cabeça */</span>
+
+    p = l;
+    <span class="k">while</span> (p-&gt;prox != NULL)         <span class="c">/* anda até o ÚLTIMO nó   */</span>
+        p = p-&gt;prox;
+    p-&gt;prox = novo;                 <span class="c">/* engata                 */</span>
+    <span class="k">return</span> l;                       <span class="c">/* a cabeça não mudou     */</span>
+}
+</code></pre>
+
+<pre class="diag">
+                    p                       p
+                    |                       |
+   [10] -&gt; [20] -&gt; [30] -&gt; NULL            [30] -&gt; [40] -&gt; NULL
+                    ^                              ^
+        para aqui (p-&gt;prox == NULL)             p-&gt;prox = novo
+</pre>
+
+<p>Três pontos de atenção:</p>
+
+<ul>
+  <li>O teste <code>l == NULL</code> vem <strong>antes</strong> do laço. Sem ele, <code>p-&gt;prox</code> com <code>p</code> NULL é falha de segmentação.</li>
+  <li>A condição é <code>p-&gt;prox != NULL</code>, não <code>p != NULL</code>. Se fosse a segunda, <code>p</code> terminaria valendo NULL e você não teria mais como alcançar o último nó.</li>
+  <li>Retornamos <code>l</code>, não <code>novo</code>: inserir no fim não muda a cabeça (exceto na lista vazia).</li>
+</ul>
+
+<h3>4.7 Inserção em uma posição</h3>
+
+<p>Para inserir na posição <code>pos</code> (contando de 0), precisamos do nó da posição <code>pos-1</code> — o <strong>anterior</strong>. Esse é o princípio geral: <em>em lista simplesmente ligada, para mexer em um nó você precisa do anterior a ele</em>.</p>
+
+<pre><code>No* insere_pos(No *l, <span class="k">int</span> v, <span class="k">int</span> pos) {
+    No *novo, *p;
+    <span class="k">int</span> i;
+
+    <span class="k">if</span> (pos &lt;= <span class="s">0</span>) <span class="k">return</span> insere_inicio(l, v);   <span class="c">/* caso especial */</span>
+
+    p = l;
+    <span class="k">for</span> (i = <span class="s">0</span>; i &lt; pos - <span class="s">1</span> &amp;&amp; p != NULL; i++)
+        p = p-&gt;prox;                <span class="c">/* para no nó pos-1 */</span>
+
+    <span class="k">if</span> (p == NULL) <span class="k">return</span> l;       <span class="c">/* posição não existe */</span>
+
+    novo = (No*) malloc(<span class="k">sizeof</span>(No));
+    <span class="k">if</span> (novo == NULL) <span class="k">return</span> l;
+
+    novo-&gt;info = v;
+    novo-&gt;prox = p-&gt;prox;          <span class="c">/* 1) novo aponta pro que vinha depois */</span>
+    p-&gt;prox    = novo;              <span class="c">/* 2) anterior aponta pro novo         */</span>
+    <span class="k">return</span> l;
+}
+</code></pre>
+
+<div class="alerta">
+  <span class="rotulo">A ordem 1 → 2 é inegociável</span>
+  <p>Se você fizer <code>p-&gt;prox = novo</code> primeiro, perde o endereço do resto da lista — e aí <code>novo-&gt;prox = p-&gt;prox</code> faz o novo nó apontar para si mesmo. Resultado: metade da lista vaza e um percurso entra em laço infinito. <strong>Sempre ligue o novo nó ao resto antes de cortar a ligação antiga.</strong></p>
+</div>
+
+<pre class="diag">
+   inserir 15 na posição 1 de [10] -&gt; [20] -&gt; [30] -&gt; NULL
+
+   p para no nó de índice 0:     p = [10]
+   novo = [15]
+
+   (1) novo-&gt;prox = p-&gt;prox
+                    [15]
+                       \
+        [10] -------&gt; [20] -&gt; [30] -&gt; NULL
+
+   (2) p-&gt;prox = novo
+        [10] -&gt; [15] -&gt; [20] -&gt; [30] -&gt; NULL
+</pre>
+
+<h3>4.8 Busca</h3>
+
+<pre><code>No* busca(No *l, <span class="k">int</span> v) {
+    No *p = l;
+    <span class="k">while</span> (p != NULL) {
+        <span class="k">if</span> (p-&gt;info == v) <span class="k">return</span> p;   <span class="c">/* achou: devolve o nó */</span>
+        p = p-&gt;prox;
+    }
+    <span class="k">return</span> NULL;                      <span class="c">/* não achou           */</span>
+}
+</code></pre>
+
+<p>A busca é sempre <strong>sequencial</strong>: Θ(n) no pior caso, Θ(1) no melhor (o primeiro já é). Mesmo que a lista esteja ordenada, <strong>não dá para fazer busca binária</strong>, porque não existe acesso direto ao elemento do meio — chegar nele já custaria Θ(n). Essa é uma comparação que cai em prova, e conecta com a aula 10 (busca sequencial × binária).</p>
+
+<p>Em lista ordenada, dá para uma otimização: parar assim que <code>p-&gt;info &gt; v</code>, já que dali para frente todos são maiores. Continua Θ(n) no pior caso, mas melhora o caso médio.</p>
+
+<h3>4.9 Remoção</h3>
+
+<p>Remover exige três coisas: achar o nó, achar o <strong>anterior</strong> dele, e tratar o caso de o nó ser o primeiro.</p>
+
+<pre><code>No* remove_valor(No *l, <span class="k">int</span> v) {
+    No *ant = NULL;     <span class="c">/* nó anterior ao p         */</span>
+    No *p   = l;        <span class="c">/* nó candidato à remoção   */</span>
+
+    <span class="k">while</span> (p != NULL &amp;&amp; p-&gt;info != v) {
+        ant = p;
+        p   = p-&gt;prox;
+    }
+
+    <span class="k">if</span> (p == NULL) <span class="k">return</span> l;    <span class="c">/* não achou: nada muda         */</span>
+
+    <span class="k">if</span> (ant == NULL)              <span class="c">/* era o primeiro nó            */</span>
+        l = p-&gt;prox;              <span class="c">/*   a cabeça passa a ser o 2º  */</span>
+    <span class="k">else</span>
+        ant-&gt;prox = p-&gt;prox;      <span class="c">/*   o anterior "pula" o p      */</span>
+
+    free(p);
+    <span class="k">return</span> l;
+}
+</code></pre>
+
+<p>Entendendo cada decisão:</p>
+
+<ul>
+  <li><strong>Por que dois ponteiros?</strong> Porque em lista simplesmente ligada não existe caminho de volta. Quando você encontra o nó, só o anterior consegue reapontar para depois dele.</li>
+  <li><strong>Por que <code>ant</code> começa em NULL?</strong> Justamente para sinalizar "ainda não passei por ninguém", ou seja, o nó encontrado é o primeiro.</li>
+  <li><strong>Ordem no <code>while</code>:</strong> <code>p != NULL &amp;&amp; p-&gt;info != v</code>. Nessa ordem, quando <code>p</code> é NULL o C nem avalia a segunda parte (avaliação em curto-circuito). Invertendo, você desreferencia NULL ao chegar no fim.</li>
+  <li><strong><code>free(p)</code> por último</strong>, depois de já ter usado <code>p-&gt;prox</code>.</li>
+</ul>
+
+<pre class="diag">
+   remover 20 de  [10] -&gt; [20] -&gt; [30] -&gt; NULL
+
+   ant = [10]   p = [20]
+
+   ant-&gt;prox = p-&gt;prox:
+        [10] ----------&gt; [30] -&gt; NULL
+                [20] (solto)
+   free(p):
+        [10] -&gt; [30] -&gt; NULL
+
+   ------------------------------------------------
+   remover 10 (o primeiro):   ant = NULL, p = [10]
+
+   l = p-&gt;prox:
+        l -&gt; [20] -&gt; [30] -&gt; NULL      free([10])
+</pre>
+
+<h3>4.10 Liberar a lista inteira</h3>
+
+<pre><code><span class="k">void</span> libera(No *l) {
+    No *p = l;
+    No *t;
+    <span class="k">while</span> (p != NULL) {
+        t = p-&gt;prox;   <span class="c">/* guarda o próximo ANTES de liberar */</span>
+        free(p);
+        p = t;
+    }
+}
+</code></pre>
+
+<div class="alerta">
+  <span class="rotulo">Por que <code>t</code> é obrigatório</span>
+  <p>Este código está <strong>errado</strong>: <code>while (p != NULL) { free(p); p = p-&gt;prox; }</code>. Depois do <code>free</code>, a memória de <code>p</code> foi devolvida ao sistema; ler <code>p-&gt;prox</code> é acessar memória inválida. Pode até "parecer funcionar" no seu computador e falhar na correção — é comportamento indefinido.</p>
+</div>
+
+<h3>4.11 Exemplos práticos, progressivos</h3>
+
+<h4>Exemplo 1 — montando e imprimindo uma lista</h4>
+
+<pre><code><span class="k">int</span> main(<span class="k">void</span>) {
+    No *lista = NULL;          <span class="c">/* começa vazia */</span>
+
+    lista = insere_fim(lista, <span class="s">10</span>);
+    lista = insere_fim(lista, <span class="s">20</span>);
+    lista = insere_fim(lista, <span class="s">30</span>);
+    lista = insere_inicio(lista, <span class="s">5</span>);
+    lista = insere_pos(lista, <span class="s">15</span>, <span class="s">2</span>);
+
+    imprime(lista);
+    libera(lista);
+    <span class="k">return</span> <span class="s">0</span>;
+}
+</code></pre>
+
+<pre class="diag">
+   NULL
+   insere_fim(10)     [10] -&gt; NULL
+   insere_fim(20)     [10] -&gt; [20] -&gt; NULL
+   insere_fim(30)     [10] -&gt; [20] -&gt; [30] -&gt; NULL
+   insere_inicio(5)   [5] -&gt; [10] -&gt; [20] -&gt; [30] -&gt; NULL
+   insere_pos(15,2)   [5] -&gt; [10] -&gt; [15] -&gt; [20] -&gt; [30] -&gt; NULL
+                                      ^ índice 2
+</pre>
+
+<p>Repare no padrão <code>lista = funcao(lista, ...)</code>. Esquecer de fazer a atribuição é o bug mais comum de quem usa a convenção (a): a função cria o nó certinho, mas a cabeça no <code>main</code> não é atualizada e o nó novo desaparece.</p>
+
+<h4>Exemplo 2 — contar elementos e somar</h4>
+
+<pre><code><span class="k">int</span> tamanho(No *l) {
+    <span class="k">int</span> n = <span class="s">0</span>;
+    No *p;
+    <span class="k">for</span> (p = l; p != NULL; p = p-&gt;prox)
+        n++;
+    <span class="k">return</span> n;
+}
+
+<span class="k">int</span> soma(No *l) {
+    <span class="k">int</span> s = <span class="s">0</span>;
+    No *p;
+    <span class="k">for</span> (p = l; p != NULL; p = p-&gt;prox)
+        s += p-&gt;info;
+    <span class="k">return</span> s;
+}
+</code></pre>
+
+<p>É o mesmo percurso do <code>imprime</code>, trocando só o que se faz dentro do laço. Uma vez que o percurso está na mão, metade dos exercícios de lista viram variações de cinco linhas.</p>
+
+<h4>Exemplo 3 — inserir mantendo a lista ordenada</h4>
+
+<p><strong>Problema:</strong> inserir um valor de modo que a lista continue em ordem crescente.</p>
+<p><strong>Lógica:</strong> ande enquanto os valores forem menores que <code>v</code>, guardando o anterior. Pare no primeiro maior ou igual — o novo nó entra ali.</p>
+
+<pre><code>No* insere_ordenado(No *l, <span class="k">int</span> v) {
+    No *ant = NULL, *p = l;
+    No *novo;
+
+    <span class="k">while</span> (p != NULL &amp;&amp; p-&gt;info &lt; v) {
+        ant = p;
+        p   = p-&gt;prox;
+    }
+
+    novo = (No*) malloc(<span class="k">sizeof</span>(No));
+    <span class="k">if</span> (novo == NULL) <span class="k">return</span> l;
+    novo-&gt;info = v;
+    novo-&gt;prox = p;              <span class="c">/* aponta pro primeiro maior/igual */</span>
+
+    <span class="k">if</span> (ant == NULL) <span class="k">return</span> novo;   <span class="c">/* entrou no início: nova cabeça */</span>
+    ant-&gt;prox = novo;
+    <span class="k">return</span> l;
+}
+</code></pre>
+
+<pre class="diag">
+   inserir 25 em  [10] -&gt; [20] -&gt; [30] -&gt; NULL
+
+   p=[10] (10&lt;25) ant=[10] -&gt; p=[20] (20&lt;25) ant=[20] -&gt; p=[30] (30&lt;25? não) para
+
+   novo-&gt;prox = p:      [25] -&gt; [30]
+   ant-&gt;prox = novo:    [10] -&gt; [20] -&gt; [25] -&gt; [30] -&gt; NULL
+</pre>
+
+<p>Este código cobre os três casos sozinho: inserir no início (<code>ant</code> continua NULL), no meio, e no fim (<code>p</code> chega a NULL e <code>novo-&gt;prox = NULL</code> é exatamente o certo).</p>
+
+<h4>Exemplo 4 — inverter a lista (o exercício de ponteiros por excelência)</h4>
+
+<p><strong>Problema:</strong> inverter a lista <em>in loco</em>, sem criar nós novos. Só virando as setas.</p>
+<p><strong>Lógica:</strong> percorra a lista mudando o <code>prox</code> de cada nó para apontar para o anterior. Como isso destrói o caminho para frente, é preciso guardar o próximo antes de virar a seta. Três ponteiros: <code>ant</code>, <code>p</code>, <code>prox</code>.</p>
+
+<pre><code>No* inverte(No *l) {
+    No *ant = NULL, *p = l, *prox;
+
+    <span class="k">while</span> (p != NULL) {
+        prox     = p-&gt;prox;   <span class="c">/* 1) salva o caminho de volta */</span>
+        p-&gt;prox  = ant;        <span class="c">/* 2) vira a seta              */</span>
+        ant      = p;          <span class="c">/* 3) anda: ant vira o atual   */</span>
+        p        = prox;       <span class="c">/* 4) e o atual vira o próximo */</span>
+    }
+    <span class="k">return</span> ant;   <span class="c">/* ant parou no último nó = nova cabeça */</span>
+}
+</code></pre>
+
+<pre class="diag">
+   início:   ant=NULL   p=[10] -&gt; [20] -&gt; [30] -&gt; NULL
+
+   iter 1:   prox=[20]; [10]-&gt;NULL;  ant=[10];  p=[20]
+             NULL &lt;- [10]      [20] -&gt; [30] -&gt; NULL
+
+   iter 2:   prox=[30]; [20]-&gt;[10];  ant=[20];  p=[30]
+             NULL &lt;- [10] &lt;- [20]      [30] -&gt; NULL
+
+   iter 3:   prox=NULL; [30]-&gt;[20];  ant=[30];  p=NULL
+             NULL &lt;- [10] &lt;- [20] &lt;- [30]
+
+   p == NULL -&gt; para. return ant = [30]
+   nova lista: [30] -&gt; [20] -&gt; [10] -&gt; NULL
+</pre>
+
+<p>Se cair "inverta uma lista" na prova, desenhe esses três ponteiros antes de escrever qualquer linha. Sem o desenho, quase todo mundo esquece de salvar <code>prox</code> e perde metade da lista na primeira iteração.</p>
+
+<h3>4.12 Complexidade</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Operação na lista ligada</th><th>Custo</th><th>Motivo</th></tr></thead>
+<tbody>
+<tr><td>inserir no início</td><td>Θ(1)</td><td>mexe só na cabeça</td></tr>
+<tr><td>inserir no fim (sem ponteiro pro fim)</td><td>Θ(n)</td><td>precisa achar o último</td></tr>
+<tr><td>inserir no fim (com ponteiro pro fim)</td><td>Θ(1)</td><td>já sabe onde é</td></tr>
+<tr><td>inserir na posição k</td><td>Θ(k)</td><td>anda até o anterior; Θ(n) no pior caso</td></tr>
+<tr><td>buscar valor</td><td>Θ(n) pior caso</td><td>busca sequencial, sem acesso direto</td></tr>
+<tr><td>remover o primeiro</td><td>Θ(1)</td><td>só move a cabeça</td></tr>
+<tr><td>remover por valor</td><td>Θ(n)</td><td>busca + religação</td></tr>
+<tr><td>percorrer / imprimir / contar</td><td>Θ(n)</td><td>visita todos</td></tr>
+<tr><td>acessar o k-ésimo elemento</td><td>Θ(k)</td><td>não existe <code>lista[k]</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>4.13 Variações (fique sabendo que existem)</h3>
+
+<ul>
+  <li><strong>Lista com nó-cabeça (sentinela):</strong> um primeiro nó falso, sem dado, que nunca é removido. Vantagem: a cabeça nunca muda, então some o caso especial "remover o primeiro" e as funções podem ser <code>void</code>. Vários livros brasileiros usam essa forma.</li>
+  <li><strong>Lista duplamente ligada:</strong> cada nó guarda <code>prox</code> e <code>ant</code>. Dá para andar nos dois sentidos e remover um nó tendo só o ponteiro para ele. Custa um ponteiro a mais por nó e mais ligações para atualizar.</li>
+  <li><strong>Lista circular:</strong> o último aponta de volta para o primeiro em vez de NULL. Cuidado: o percurso não pode testar NULL, e sim "voltei ao ponto de partida".</li>
+</ul>
+
+<p>Se o professor não cobriu isso em sala, não vai cair implementação — mas reconhecer a diferença é comum em questão conceitual.</p>
+
+<h3>4.14 Exercícios de lista ligada</h3>
+
+<div class="ex">
+<p><span class="nivel n1">🟢 Fácil — L1.</span> Desenhe o estado da lista após cada operação, partindo de <code>NULL</code>: <code>insere_inicio(3)</code>, <code>insere_fim(8)</code>, <code>insere_inicio(1)</code>, <code>insere_pos(5, 2)</code>, <code>remove_valor(8)</code>. Quantos nós ficam? Qual é a cabeça?</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre class="diag">
+   início              NULL
+   insere_inicio(3)    [3] -&gt; NULL
+   insere_fim(8)       [3] -&gt; [8] -&gt; NULL
+   insere_inicio(1)    [1] -&gt; [3] -&gt; [8] -&gt; NULL
+   insere_pos(5, 2)    [1] -&gt; [3] -&gt; [5] -&gt; [8] -&gt; NULL
+                                      ^ índice 2 (anterior = índice 1 = [3])
+   remove_valor(8)     [1] -&gt; [3] -&gt; [5] -&gt; NULL
+</pre>
+<p>Ficam <strong>3 nós</strong> e a cabeça é o nó com valor <strong>1</strong>. No <code>remove_valor(8)</code>, o nó removido era o último: o anterior ([5]) recebeu <code>prox = NULL</code>, que era o <code>prox</code> do nó removido.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n1">🟢 Fácil — L2.</span> Explique, sem código, por que <code>insere_inicio</code> é Θ(1) e <code>insere_fim</code> é Θ(n) numa lista simplesmente ligada — e por que num vetor é exatamente o contrário.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p><strong>Na lista:</strong> a cabeça é conhecida de imediato, então inserir no início é criar um nó e ajustar duas setas — um número fixo de passos, independente de <code>n</code>. Já o fim não é conhecido: só se descobre quem é o último andando nó a nó até achar <code>prox == NULL</code>, o que são <code>n</code> passos.</p>
+<p><strong>No vetor:</strong> o fim é conhecido de imediato (é a posição <code>qtd</code>), então inserir lá é uma atribuição, Θ(1). Já inserir no início obriga a empurrar os <code>n</code> elementos uma casa para a direita, Θ(n).</p>
+<p>Resumo em uma frase: <em>cada estrutura é rápida na ponta que ela consegue enxergar sem procurar</em>. Por isso a lista com ponteiro extra para o fim recupera o Θ(1) na inserção final — é exatamente o que a fila encadeada faz.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 Médio — L3.</span> Implemente <code>No* remove_pos(No *l, int pos)</code>, que remove o nó da posição <code>pos</code> (contando de 0). Trate: posição 0, posição inexistente e lista vazia.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre><code>No* remove_pos(No *l, int pos) {
+    No *ant = NULL, *p = l;
+    int i;
+
+    if (l == NULL || pos &lt; 0) return l;       /* lista vazia ou pos inválida */
+
+    for (i = 0; i &lt; pos &amp;&amp; p != NULL; i++) {  /* anda até a posição pedida   */
+        ant = p;
+        p   = p-&gt;prox;
+    }
+
+    if (p == NULL) return l;                  /* posição não existe          */
+
+    if (ant == NULL) l = p-&gt;prox;             /* removendo o primeiro        */
+    else ant-&gt;prox = p-&gt;prox;
+
+    free(p);
+    return l;
+}</code></pre>
+<p>Diferença em relação ao <code>remove_valor</code>: o critério de parada é o contador, não a comparação de conteúdo. A estrutura (dois ponteiros, caso do primeiro nó, free no fim) é idêntica — e é essa estrutura que você deve ter memorizada.</p>
+<p>O <code>&amp;&amp; p != NULL</code> dentro do <code>for</code> é o que protege contra <code>pos</code> maior que o tamanho: o laço para em NULL e o <code>if</code> seguinte devolve a lista intacta.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 Médio — L4.</span> Escreva <code>No* concatena(No *a, No *b)</code>, que engata a lista <code>b</code> no fim da lista <code>a</code> e devolve a cabeça do resultado, sem criar nós novos. Trate os casos de lista vazia.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre><code>No* concatena(No *a, No *b) {
+    No *p;
+    if (a == NULL) return b;     /* a vazia: o resultado é b */
+    if (b == NULL) return a;     /* b vazia: nada a fazer    */
+
+    p = a;
+    while (p-&gt;prox != NULL)      /* acha o último de a       */
+        p = p-&gt;prox;
+    p-&gt;prox = b;                 /* engata                   */
+    return a;
+}</code></pre>
+<p>Custo Θ(n<sub>a</sub>): depende só do tamanho da primeira lista, porque a segunda é engatada inteira em uma atribuição.</p>
+<p><strong>Armadilha:</strong> depois da concatenação, <code>b</code> continua sendo um ponteiro válido para o meio da lista resultante. Se alguém der <code>libera(a)</code> e depois <code>libera(b)</code>, os nós de <code>b</code> seriam liberados duas vezes — <em>double free</em>. Na prática, após concatenar, trate <code>b</code> como inutilizável.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n3">🔴 Difícil — L5.</span> Escreva <code>No* remove_duplicados(No *l)</code> para uma lista <strong>ordenada crescente</strong>, deixando só uma ocorrência de cada valor. Exemplo: <code>[1]-&gt;[1]-&gt;[2]-&gt;[3]-&gt;[3]-&gt;[3]</code> vira <code>[1]-&gt;[2]-&gt;[3]</code>. Qual é a complexidade?</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p><strong>Ideia:</strong> como a lista está ordenada, duplicatas são sempre vizinhas. Então basta comparar cada nó com o seguinte e, quando forem iguais, remover o seguinte.</p>
+<pre><code>No* remove_duplicados(No *l) {
+    No *p = l;
+    No *lixo;
+
+    while (p != NULL &amp;&amp; p-&gt;prox != NULL) {
+        if (p-&gt;info == p-&gt;prox-&gt;info) {
+            lixo    = p-&gt;prox;          /* guarda quem vai sair    */
+            p-&gt;prox = lixo-&gt;prox;       /* pula por cima dele       */
+            free(lixo);
+            /* NÃO avança p: pode haver outra duplicata em seguida  */
+        } else {
+            p = p-&gt;prox;                /* só avança quando difere  */
+        }
+    }
+    return l;
+}</code></pre>
+<p><strong>Os dois pontos que separam quem entendeu de quem decorou:</strong></p>
+<ol>
+  <li><strong>Não avançar <code>p</code> após remover.</strong> Em <code>[3]-&gt;[3]-&gt;[3]</code>, se você avançasse, sobraria uma duplicata. Ficando parado, o mesmo <code>p</code> compara de novo com o novo vizinho.</li>
+  <li><strong>A condição dupla no while.</strong> <code>p-&gt;prox != NULL</code> garante que existe um vizinho para comparar; <code>p != NULL</code> protege a lista vazia. A ordem importa por causa do curto-circuito.</li>
+</ol>
+<pre class="diag">
+   [1]-&gt;[1]-&gt;[2]-&gt;[3]-&gt;[3]-&gt;[3]-&gt;NULL
+    p    igual -&gt; remove o 2º [1]
+   [1]-&gt;[2]-&gt;[3]-&gt;[3]-&gt;[3]-&gt;NULL
+    p    difere -&gt; avança
+   [1]-&gt;[2]-&gt;[3]-&gt;[3]-&gt;[3]  p=[2] difere -&gt; avança
+                  p=[3] igual -&gt; remove   [1]-&gt;[2]-&gt;[3]-&gt;[3]
+                  p=[3] igual -&gt; remove   [1]-&gt;[2]-&gt;[3]
+                  p-&gt;prox == NULL -&gt; para
+</pre>
+<p><strong>Complexidade:</strong> Θ(n). Cada nó é visitado no máximo uma vez para comparar e no máximo uma vez para ser removido; nenhum passo repete o percurso.</p>
+<p><strong>E se a lista não fosse ordenada?</strong> Aí as duplicatas podem estar longe uma da outra e a solução direta é, para cada nó, varrer o resto da lista removendo iguais — Θ(n²). Saber apontar essa diferença rende ponto.</p>
+</div></details>
+</div>
+
+<div class="resumo">
+  <h4>Resumo do capítulo 4</h4>
+  <ul>
+    <li>Nó = dado + ponteiro para o próximo; a lista é o ponteiro para o primeiro nó; NULL marca o fim e a lista vazia.</li>
+    <li>Percurso padrão: <code>for (p = l; p != NULL; p = p-&gt;prox)</code>. Nunca caminhe com a cabeça.</li>
+    <li>Inserir no início: <code>novo-&gt;prox = l; return novo;</code> — Θ(1).</li>
+    <li>Inserir no fim ou no meio: ache o anterior; ligue o novo ao resto <strong>antes</strong> de religar o anterior.</li>
+    <li>Remover: precisa de <code>ant</code> e <code>p</code>; trate o primeiro nó (<code>ant == NULL</code>); <code>free</code> só depois de usar <code>p-&gt;prox</code>.</li>
+    <li>Busca sequencial Θ(n); sem acesso direto, sem busca binária.</li>
+    <li>Funções que podem mudar a cabeça retornam a nova cabeça (ou recebem <code>No **</code>).</li>
+  </ul>
+</div>
+
+<h2 id="cap5">5. Comparações importantes</h2>
+
+<h3>5.1 Pilha × Fila × Lista ligada</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th></th><th>Pilha</th><th>Fila</th><th>Lista ligada</th></tr></thead>
+<tbody>
+<tr><td>Política</td><td>LIFO</td><td>FIFO</td><td>livre</td></tr>
+<tr><td>Onde insere</td><td>topo</td><td>fim</td><td>qualquer posição</td></tr>
+<tr><td>Onde remove</td><td>topo</td><td>início</td><td>qualquer posição</td></tr>
+<tr><td>Pontos de acesso</td><td>1</td><td>2</td><td>toda a lista (via percurso)</td></tr>
+<tr><td>Efeito na ordem</td><td>inverte</td><td>preserva</td><td>você decide</td></tr>
+<tr><td>Ponteiros guardados (versão ligada)</td><td><code>topo</code></td><td><code>inicio</code>, <code>fim</code></td><td><code>cabeça</code> (e às vezes <code>fim</code>)</td></tr>
+<tr><td>Usos típicos</td><td>desfazer, recursão, parênteses, pós-fixa</td><td>atendimento, buffer, BFS</td><td>coleção dinâmica genérica; base das outras duas</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Vale enxergar a relação entre as três: <strong>pilha e fila são listas com restrição de acesso</strong>. A restrição não é uma limitação acidental — é o que garante o comportamento (LIFO/FIFO) e o que permite todas as operações em Θ(1).</p>
+
+<h3>5.2 Vetor × Lista ligada</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Critério</th><th>Vetor</th><th>Lista ligada</th></tr></thead>
+<tbody>
+<tr><td>Tamanho</td><td>fixo (definido antes)</td><td>cresce e diminui em execução</td></tr>
+<tr><td>Memória</td><td>bloco contíguo</td><td>nós espalhados pela memória</td></tr>
+<tr><td>Memória extra</td><td>nenhuma por elemento</td><td>1 ponteiro por nó (+ custo do malloc)</td></tr>
+<tr><td>Acesso ao k-ésimo</td><td>Θ(1) — <code>v[k]</code></td><td>Θ(k) — precisa andar</td></tr>
+<tr><td>Inserir no início</td><td>Θ(n) — desloca tudo</td><td>Θ(1)</td></tr>
+<tr><td>Inserir no fim</td><td>Θ(1) (se houver espaço)</td><td>Θ(n), ou Θ(1) com ponteiro para o fim</td></tr>
+<tr><td>Remover do meio</td><td>Θ(n) — desloca tudo</td><td>Θ(1) se já tem o anterior; Θ(n) para achá-lo</td></tr>
+<tr><td>Busca binária</td><td>possível (se ordenado)</td><td>não compensa: sem acesso direto</td></tr>
+<tr><td>Desperdício</td><td>posições reservadas e não usadas</td><td>nenhum: aloca o necessário</td></tr>
+<tr><td>Risco</td><td>estourar o limite</td><td>vazamento e ponteiro inválido</td></tr>
+<tr><td>Facilidade de implementar</td><td>maior</td><td>menor (ponteiros)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="dica">
+  <span class="rotulo">Resposta curta para "vetor ou lista?"</span>
+  <p>Se você sabe o tamanho máximo e quer acesso rápido por índice, use <strong>vetor</strong>. Se o tamanho varia muito, é imprevisível, e você insere/remove nas pontas, use <strong>lista</strong>. Numa pilha, as duas são igualmente Θ(1) — aí a escolha é entre limite fixo (vetor) e alocação dinâmica (lista).</p>
+</div>
+
+<h3>5.3 Quando usar cada estrutura</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Se o enunciado diz...</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td>"desfazer", "voltar", "último", "inverter ordem", "expressão", "recursão"</td><td>pilha</td></tr>
+<tr><td>"ordem de chegada", "atendimento", "primeiro que entrou", "buffer", "por nível"</td><td>fila</td></tr>
+<tr><td>"inserir no meio", "manter ordenado", "quantidade indefinida", "remover qualquer elemento"</td><td>lista ligada</td></tr>
+<tr><td>"acessar o i-ésimo rapidamente", "tamanho conhecido", "busca binária"</td><td>vetor</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="cap6">6. O que eu preciso saber para a prova</h2>
+
+<h3>6.1 Conceitos que precisam estar na ponta da língua</h3>
+
+<ul>
+  <li>Definir pilha, fila e lista ligada como TAD: operações e comportamento, não implementação.</li>
+  <li>LIFO × FIFO, e qual estrutura resolve qual tipo de problema.</li>
+  <li>O que é um nó, o que é a cabeça, o que significa <code>NULL</code> em cada contexto.</li>
+  <li>Por que uma função que altera a cabeça precisa retorná-la ou receber <code>No **</code>.</li>
+  <li>Por que a fila com vetor precisa ser circular, e como <code>% MAX</code> faz isso.</li>
+  <li>Complexidade de cada operação nas duas implementações — e saber justificar, não só decorar.</li>
+  <li>Diferença entre alocação estática (vetor) e dinâmica (<code>malloc</code>/<code>free</code>).</li>
+</ul>
+
+<h3>6.2 Operações que preciso saber escrever do zero</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Pilha</th><th>Fila</th><th>Lista ligada</th></tr></thead>
+<tbody>
+<tr><td>inicializa, vazia, cheia, push, pop, top — vetor <em>e</em> lista</td><td>inicializa, vazia, cheia, enqueue, dequeue, frente — vetor circular <em>e</em> lista</td><td>inserir início, inserir fim, inserir posição/ordenado, buscar, remover, percorrer, contar, liberar, inverter</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>6.3 Erros comuns (releia isto na véspera)</h3>
+
+<ol>
+  <li><strong>Desreferenciar NULL:</strong> <code>p-&gt;info</code> sem ter testado <code>p != NULL</code>.</li>
+  <li><strong>Inverter a ordem das ligações:</strong> religar o anterior antes de ligar o novo nó ao resto → perde a lista.</li>
+  <li><strong>free cedo demais:</strong> liberar o nó e depois ler <code>p-&gt;prox</code>.</li>
+  <li><strong>Caminhar com a cabeça:</strong> usar <code>l = l-&gt;prox</code> no percurso e perder a lista.</li>
+  <li><strong>Esquecer <code>lista = funcao(lista, ...)</code>:</strong> a função devolve a nova cabeça e ninguém guarda.</li>
+  <li><strong>Passar a estrutura por valor:</strong> <code>push(Pilha p, ...)</code> altera uma cópia; o original não muda.</li>
+  <li><strong>Não zerar <code>fim</code></strong> quando o último elemento sai da fila encadeada.</li>
+  <li><strong>Não tratar vazia/cheia:</strong> pop em pilha vazia, dequeue em fila vazia, push em vetor cheio.</li>
+  <li><strong>Esquecer <code>novo-&gt;prox = NULL</code></strong> ao criar o nó que vai ser o último — ele fica apontando para lixo.</li>
+  <li><strong>Vazamento de memória:</strong> remover sem <code>free</code>, ou perder o endereço antes de liberar.</li>
+  <li><strong>Misturar convenções</strong> de <code>topo</code> (índice × quantidade) no mesmo código.</li>
+  <li><strong>Trocar <code>.</code> por <code>-&gt;</code></strong> — erro de compilação fácil no computador, erro de nota fácil no papel.</li>
+</ol>
+
+<h3>6.4 Pegadinhas de prova</h3>
+
+<ul>
+  <li><strong><code>top</code> não remove.</strong> Uma sequência de operações com <code>top()</code> no meio existe só para pegar quem lê rápido demais.</li>
+  <li><strong>Vetor de fila circular fora de ordem.</strong> Perguntar "o conteúdo de <code>dados[0]</code>" é diferente de "o primeiro da fila".</li>
+  <li><strong>Elementos "removidos" que continuam no vetor.</strong> O pop mexe no índice, não apaga o valor.</li>
+  <li><strong>Curto-circuito do <code>&amp;&amp;</code>.</strong> Trocar a ordem de <code>p != NULL &amp;&amp; p-&gt;info == v</code> quebra o programa; saber explicar por quê vale ponto.</li>
+  <li><strong>Inserir na posição 0 e remover o primeiro</strong> — os casos especiais que todo mundo esquece de tratar.</li>
+  <li><strong>"Qual estrutura usar?"</strong> disfarçado num enunciado em texto corrido. Procure as palavras do quadro 5.3.</li>
+  <li><strong>Complexidade de <code>insere_fim</code>:</strong> a resposta muda conforme exista ou não um ponteiro para o fim. Diga sob qual hipótese você está respondendo.</li>
+</ul>
+
+<h3>6.5 Como acompanhar os ponteiros em uma questão escrita</h3>
+
+<p>Um método que funciona na hora da prova, com papel:</p>
+
+<ol>
+  <li><strong>Desenhe o estado inicial</strong> com caixas e setas, incluindo todos os ponteiros nomeados (<code>l</code>, <code>p</code>, <code>ant</code>, <code>topo</code>, <code>inicio</code>, <code>fim</code>).</li>
+  <li><strong>Execute uma linha por vez.</strong> Nunca duas.</li>
+  <li><strong>Atribuição a ponteiro = apagar uma seta e desenhar outra.</strong> Apague só a seta que sai do lado esquerdo da atribuição.</li>
+  <li>Depois de cada linha, pergunte: <em>algum nó ficou sem ninguém apontando para ele?</em> Se ficou e não foi liberado, é vazamento — e provavelmente um erro.</li>
+  <li>Ao final, confira os <strong>casos de borda</strong>: lista vazia, um único elemento, remover o primeiro, remover o último.</li>
+</ol>
+
+<pre class="diag">
+   Exemplo de folha de rascunho para  ant-&gt;prox = p-&gt;prox;
+
+   antes:   ant -&gt; [20] -&gt; [30] -&gt; NULL
+                    p
+
+   passo:   a seta que SAI de ant é apagada e redesenhada para p-&gt;prox
+
+   depois:  ant ----------&gt; [30] -&gt; NULL
+                    [20]  (sem ninguém apontando: precisa de free)
+</pre>
+
+<h3>6.6 Como analisar a complexidade das operações</h3>
+
+<p>Roteiro de três perguntas:</p>
+
+<ol>
+  <li><strong>A operação percorre a estrutura?</strong> Se não percorre (só mexe em ponteiros/índices de uma ponta conhecida), é Θ(1). Se percorre tudo, Θ(n).</li>
+  <li><strong>Percorre até onde?</strong> Até a posição <code>k</code> → Θ(k), com pior caso Θ(n). Até achar um valor → Θ(n) no pior caso, Θ(1) no melhor.</li>
+  <li><strong>Há laço dentro de laço?</strong> Para cada nó, varrer o resto da lista → Θ(n²).</li>
+</ol>
+
+<p>Lembre que Θ dá o comportamento exato (limite superior e inferior), enquanto O dá só o limite superior. Dizer que <code>push</code> é O(n) não é falso — é impreciso. Quando a operação tem um custo bem definido, o correto é Θ.</p>
+
+<h3>6.7 Exercícios de rastreamento</h3>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 R1 — Pilha.</span> Pilha com vetor, <code>MAX = 5</code>, inicialmente vazia. Execute e diga, após cada operação, o valor de <code>topo</code> e o conteúdo do vetor nas posições 0 a 4 (use <code>?</code> para lixo e mantenha os valores antigos quando fizer sentido):</p>
+<p><code>push(7) push(3) pop() push(9) push(2) top() pop() pop() pop()</code></p>
+<div class="espaco">rastreie antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre class="diag">
+   operação   retorno   topo   d[0] d[1] d[2] d[3] d[4]
+   ---------  --------  ----   ---------------------------
+   (início)             -1      ?    ?    ?    ?    ?
+   push(7)    1          0      7    ?    ?    ?    ?
+   push(3)    1          1      7    3    ?    ?    ?
+   pop()      3          0      7    3    ?    ?    ?   &lt;- 3 CONTINUA em d[1]
+   push(9)    1          1      7    9    ?    ?    ?   &lt;- sobrescreve o 3
+   push(2)    1          2      7    9    2    ?    ?
+   top()      2          2      7    9    2    ?    ?   &lt;- não muda nada
+   pop()      2          1      7    9    2    ?    ?
+   pop()      9          0      7    9    2    ?    ?
+   pop()      7         -1      7    9    2    ?    ?   &lt;- pilha vazia
+</pre>
+<p>Dois pontos: o valor 3 só some quando é <em>sobrescrito</em> pelo push(9), e o <code>top()</code> aparece na coluna de retorno sem alterar nenhuma outra coluna.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 R2 — Fila circular.</span> <code>MAX = 4</code>, campos <code>inicio</code> e <code>qtd</code>, fila vazia. Execute: <code>enq(A) enq(B) deq() enq(C) enq(D) enq(E) deq() enq(F)</code>. Dê, no fim, <code>inicio</code>, <code>qtd</code>, o vetor por posição e a ordem lógica da fila. Alguma operação falhou?</p>
+<div class="espaco">rastreie antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre class="diag">
+   op       fim=(ini+qtd)%4   vetor              ini  qtd
+   enq(A)   (0+0)%4=0         [A][ ][ ][ ]        0    1
+   enq(B)   (0+1)%4=1         [A][B][ ][ ]        0    2
+   deq -&gt; A                   [_][B][ ][ ]        1    1
+   enq(C)   (1+1)%4=2         [_][B][C][ ]        1    2
+   enq(D)   (1+2)%4=3         [_][B][C][D]        1    3
+   enq(E)   (1+3)%4=0         [E][B][C][D]        1    4   &lt;- deu a volta
+   deq -&gt; B                   [E][_][C][D]        2    3
+   enq(F)   (2+3)%4=1         [E][F][C][D]        2    4
+</pre>
+<p><code>inicio = 2</code>, <code>qtd = 4</code> (cheia), vetor <code>[E][F][C][D]</code>. Ordem lógica: <strong>C, D, E, F</strong> — começando em <code>inicio=2</code> e dando a volta. Nenhuma operação falhou: a fila chegou a 4 elementos, que é exatamente <code>MAX</code>; um <code>enq</code> a mais é que seria recusado.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n3">🔴 R3 — Lista ligada.</span> Partindo de <code>[4] -&gt; [8] -&gt; [15] -&gt; [16] -&gt; NULL</code>, rastreie e desenhe a lista após cada passo:</p>
+<p><code>insere_inicio(2)</code>, <code>remove_valor(15)</code>, <code>insere_pos(23, 3)</code>, <code>remove_valor(2)</code>, <code>inverte()</code>. Quantos <code>malloc</code> e quantos <code>free</code> aconteceram?</p>
+<div class="espaco">rastreie antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre class="diag">
+   início              [4] -&gt; [8] -&gt; [15] -&gt; [16] -&gt; NULL
+
+   insere_inicio(2)    [2] -&gt; [4] -&gt; [8] -&gt; [15] -&gt; [16] -&gt; NULL     malloc #1
+                       (nova cabeça = [2])
+
+   remove_valor(15)    ant=[8], p=[15];  ant-&gt;prox = p-&gt;prox = [16]   free #1
+                       [2] -&gt; [4] -&gt; [8] -&gt; [16] -&gt; NULL
+
+   insere_pos(23, 3)   anterior = índice 2 = [8]                      malloc #2
+                       novo-&gt;prox = [16];  [8]-&gt;prox = [23]
+                       [2] -&gt; [4] -&gt; [8] -&gt; [23] -&gt; [16] -&gt; NULL
+                        0      1      2      3       4
+
+   remove_valor(2)     ant=NULL (era o primeiro) -&gt; l = p-&gt;prox       free #2
+                       [4] -&gt; [8] -&gt; [23] -&gt; [16] -&gt; NULL
+
+   inverte()           [16] -&gt; [23] -&gt; [8] -&gt; [4] -&gt; NULL
+                       (nenhum malloc/free: só virou as setas)
+</pre>
+<p><strong>2 malloc e 2 free</strong>, e a lista final tem 4 nós. Confira os dois pontos de atenção: no <code>insere_pos(23, 3)</code> o nó novo fica no índice 3 <em>da lista no momento da inserção</em>; no <code>remove_valor(2)</code>, como o alvo era o primeiro nó, quem mudou foi a cabeça, não um <code>ant-&gt;prox</code>.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n3">🔴 R4 — Código com bug.</span> O <code>pop</code> abaixo, de pilha encadeada, tem <strong>dois</strong> problemas. Encontre e corrija.</p>
+<pre><code>int pop(Pilha *p, int *saida) {
+    *saida = p-&gt;topo-&gt;info;
+    free(p-&gt;topo);
+    p-&gt;topo = p-&gt;topo-&gt;prox;
+    return 1;
+}</code></pre>
+<div class="espaco">encontre os dois antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p><strong>Bug 1 — não testa pilha vazia.</strong> Se <code>p-&gt;topo</code> é NULL, a primeira linha já desreferencia NULL: <em>segmentation fault</em>. E a função sempre devolve 1, mentindo que deu certo.</p>
+<p><strong>Bug 2 — uso depois do free.</strong> A terceira linha lê <code>p-&gt;topo-&gt;prox</code> de memória que acabou de ser devolvida ao sistema. É comportamento indefinido: pode funcionar hoje e corromper a pilha amanhã.</p>
+<p>Versão corrigida, com o ponteiro auxiliar:</p>
+<pre><code>int pop(Pilha *p, int *saida) {
+    No *aux;
+    if (p-&gt;topo == NULL) return 0;    /* corrige o bug 1 */
+    aux       = p-&gt;topo;
+    *saida    = aux-&gt;info;
+    p-&gt;topo   = aux-&gt;prox;            /* lê ANTES de liberar */
+    free(aux);                         /* corrige o bug 2 */
+    return 1;
+}</code></pre>
+<p>Questões "ache o erro" são frequentes porque testam exatamente as duas coisas que separam código que compila de código correto: casos de borda e ordem das operações com ponteiros.</p>
+</div></details>
+</div>
+
+<h2 id="cap7">7. Revisão geral antes da prova</h2>
+
+<h3>7.1 Mapa mental dos três assuntos</h3>
+
+<pre class="diag">
+                        ESTRUTURAS LINEARES
+                                |
+         +----------------------+----------------------+
+         |                      |                      |
+      PILHA                   FILA               LISTA LIGADA
+      (LIFO)                 (FIFO)               (livre)
+         |                      |                      |
+   +-----+-----+          +-----+-----+          +-----+------+
+   |           |          |           |          |            |
+ VETOR      LISTA       VETOR       LISTA      nó = info + prox
+ topo=-1    topo=NULL   circular    inicio                 |
+ push:      push:       %MAX        + fim            operações:
+  topo++     novo-&gt;prox  inicio      enq: fim-&gt;prox   ins. início  O(1)
+  d[topo]=v  = topo      + qtd       deq: inicio      ins. fim     O(n)
+ pop:       pop:                     zerar fim se     ins. posição O(k)
+  x=d[topo]  aux=topo                esvaziou         busca        O(n)
+  topo--     topo=aux-&gt;prox                           remoção      O(n)
+             free(aux)                                percurso     O(n)
+         |           |          |           |          |            |
+       tudo O(1)   tudo O(1)  tudo O(1)   tudo O(1)   depende da posição
+
+   Regras que valem para as três:
+   - testar vazia antes de remover/consultar
+   - ligar o novo nó ao resto ANTES de religar o anterior
+   - free só depois de ter usado o prox
+   - quem muda a cabeça, retorna a cabeça
+</pre>
+
+<h3>7.2 Tabela de complexidades (a única que precisa estar decorada)</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Operação</th><th>Pilha (vetor)</th><th>Pilha (ligada)</th><th>Fila (vetor circ.)</th><th>Fila (ligada)</th><th>Lista ligada</th></tr></thead>
+<tbody>
+<tr><td>inserir</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1) início / Θ(n) fim</td></tr>
+<tr><td>remover</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1) início / Θ(n) por valor</td></tr>
+<tr><td>consultar extremidade</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1)</td><td>Θ(1) início / Θ(n) fim</td></tr>
+<tr><td>buscar valor</td><td>Θ(n)</td><td>Θ(n)</td><td>Θ(n)</td><td>Θ(n)</td><td>Θ(n)</td></tr>
+<tr><td>acessar k-ésimo</td><td>Θ(1)</td><td>Θ(k)</td><td>Θ(1)</td><td>Θ(k)</td><td>Θ(k)</td></tr>
+<tr><td>espaço</td><td>Θ(MAX) fixo</td><td>Θ(n)</td><td>Θ(MAX) fixo</td><td>Θ(n)</td><td>Θ(n)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>7.3 Checklist: operações que eu consigo implementar sozinho</h3>
+
+<p>Marque só o que você conseguiu escrever <strong>sem consultar nada</strong>. As marcações ficam salvas neste navegador.</p>
+
+<ul class="check" id="checklist">
+  <li><input type="checkbox" id="c1"><span>Pilha com vetor: inicializa, vazia, cheia, push, pop, top</span></li>
+  <li><input type="checkbox" id="c2"><span>Pilha com lista ligada: push, pop, libera</span></li>
+  <li><input type="checkbox" id="c3"><span>Fila com vetor circular: enqueue, dequeue, frente, cheia</span></li>
+  <li><input type="checkbox" id="c4"><span>Fila com lista ligada: enqueue (com o if de fila vazia) e dequeue (zerando o fim)</span></li>
+  <li><input type="checkbox" id="c5"><span>Lista: percurso, imprime, tamanho</span></li>
+  <li><input type="checkbox" id="c6"><span>Lista: insere no início e no fim</span></li>
+  <li><input type="checkbox" id="c7"><span>Lista: insere em posição e insere ordenado</span></li>
+  <li><input type="checkbox" id="c8"><span>Lista: busca</span></li>
+  <li><input type="checkbox" id="c9"><span>Lista: remove por valor (tratando o primeiro nó) e remove por posição</span></li>
+  <li><input type="checkbox" id="c10"><span>Lista: libera tudo sem usar memória liberada</span></li>
+  <li><input type="checkbox" id="c11"><span>Lista: inverte in loco com três ponteiros</span></li>
+  <li><input type="checkbox" id="c12"><span>Converter decimal para binário com pilha</span></li>
+  <li><input type="checkbox" id="c13"><span>Verificar parênteses balanceados</span></li>
+  <li><input type="checkbox" id="c14"><span>Inverter uma fila usando uma pilha</span></li>
+  <li><input type="checkbox" id="c15"><span>Dizer a complexidade de qualquer uma dessas operações e justificar</span></li>
+</ul>
+
+<h3>7.4 Os erros que mais custam nota</h3>
+
+<ol>
+  <li>Não tratar estrutura vazia.</li>
+  <li>Religar ponteiros na ordem errada.</li>
+  <li><code>free</code> antes de ler o <code>prox</code>.</li>
+  <li>Perder a cabeça da lista no percurso.</li>
+  <li>Esquecer <code>f-&gt;fim = NULL</code> ao esvaziar a fila.</li>
+  <li>Esquecer o <code>% MAX</code> na fila circular.</li>
+  <li>Passar a estrutura por valor em vez de por ponteiro.</li>
+</ol>
+
+<h3>7.5 Dez questões de revisão</h3>
+
+<ol>
+  <li>Defina pilha e fila como TAD, sem citar vetor nem lista ligada.</li>
+  <li>Por que uma fila implementada com vetor precisa ser circular?</li>
+  <li>Qual a diferença entre <code>pop</code> e <code>top</code>? E entre <code>dequeue</code> e <code>frente</code>?</li>
+  <li>Por que a pilha encadeada dispensa um <code>if</code> para o caso "vazia" no <code>push</code>, mas a fila encadeada precisa de um no <code>enqueue</code>?</li>
+  <li>Em que situação <code>insere_fim</code> em lista ligada é Θ(1)?</li>
+  <li>Por que não faz sentido aplicar busca binária em uma lista ligada ordenada?</li>
+  <li>O que acontece se, no <code>push</code> da pilha encadeada, você fizer <code>p-&gt;topo = novo</code> antes de <code>novo-&gt;prox = p-&gt;topo</code>?</li>
+  <li>Por que a remoção em lista simplesmente ligada precisa do nó anterior?</li>
+  <li>Cite duas vantagens do vetor sobre a lista ligada e duas da lista sobre o vetor.</li>
+  <li>Um programa precisa guardar as últimas ações do usuário para um "desfazer" e, separadamente, as tarefas a executar por ordem de chegada. Qual estrutura para cada caso, e por quê?</li>
+</ol>
+
+<details><summary>Respostas resumidas</summary><div class="conteudo">
+<ol>
+  <li>Pilha: coleção com inserção e remoção na mesma extremidade; comportamento LIFO. Fila: inserção em uma extremidade e remoção na outra; comportamento FIFO. O TAD descreve as operações e as garantias, não a implementação.</li>
+  <li>Porque sem a circularidade os índices só andam para a direita: as posições liberadas pelos <code>dequeue</code> no começo do vetor ficariam inutilizáveis e a fila se daria por cheia com espaço sobrando.</li>
+  <li><code>pop</code> e <code>dequeue</code> removem e devolvem; <code>top</code> e <code>frente</code> apenas consultam, deixando a estrutura idêntica.</li>
+  <li>No push, <code>novo-&gt;prox = p-&gt;topo</code> funciona igualmente bem quando <code>topo</code> é NULL. No enqueue, a fila vazia tem <code>fim == NULL</code>, e <code>f-&gt;fim-&gt;prox</code> desreferenciaria NULL — daí o <code>if</code>.</li>
+  <li>Quando a estrutura guarda um ponteiro para o último nó (é o caso da fila encadeada). Sem ele, é Θ(n).</li>
+  <li>Porque a busca binária depende de acessar o elemento do meio em Θ(1). Na lista, chegar ao meio custa Θ(n), o que anula o ganho.</li>
+  <li><code>novo-&gt;prox</code> passaria a apontar para o próprio nó novo, criando um ciclo; e o resto da pilha ficaria sem ninguém apontando para ele — vazamento e possível laço infinito.</li>
+  <li>Porque as setas só apontam para frente: quem precisa passar a apontar para depois do nó removido é o anterior, e não há como alcançá-lo a partir do nó removido.</li>
+  <li>Vetor: acesso direto por índice em Θ(1) e nenhum gasto de memória com ponteiros. Lista: tamanho dinâmico e inserção/remoção nas pontas sem deslocar elementos.</li>
+  <li>Desfazer é pilha (a última ação é a primeira a desfazer, LIFO). Tarefas por ordem de chegada é fila (FIFO).</li>
+</ol>
+</div></details>
+
+<h3>7.6 Cinco exercícios de implementação</h3>
+
+<ol>
+  <li>Implemente uma pilha de <code>char</code> com lista ligada e use-a para verificar se uma palavra é palíndroma.</li>
+  <li>Implemente a fila circular completa com <code>MAX = 5</code> e escreva um <code>main</code> que force o caso "fila cheia" e o caso "dequeue em fila vazia", imprimindo as mensagens adequadas.</li>
+  <li>Implemente <code>No* copia(No *l)</code>, que devolve uma <strong>cópia independente</strong> da lista (nós novos, mesma ordem). Cuidado para não devolver a lista invertida.</li>
+  <li>Implemente <code>int igual(No *a, No *b)</code>, que diz se duas listas têm os mesmos valores na mesma ordem.</li>
+  <li>Implemente <code>No* intercala(No *a, No *b)</code>, que recebe duas listas <strong>ordenadas</strong> e devolve uma única lista ordenada, reaproveitando os nós existentes (sem <code>malloc</code>).</li>
+</ol>
+
+<details><summary>Dicas (abra só se travar)</summary><div class="conteudo">
+<ol>
+  <li>Empilhe todos os caracteres, depois percorra a palavra de novo desempilhando: se algum par diferir, não é palíndroma.</li>
+  <li>Faça 5 <code>enqueue</code> seguidos e teste o retorno do sexto; depois 5 <code>dequeue</code> e teste o retorno do sexto.</li>
+  <li>Percorra <code>l</code> inserindo no fim da cópia — ou insira no início e inverta no final. Inserir no início sem inverter produz a lista ao contrário: é justamente o erro que o enunciado avisa.</li>
+  <li>Ande com dois ponteiros ao mesmo tempo; são iguais se acabarem juntos em NULL sem nenhuma diferença pelo caminho.</li>
+  <li>Compare as cabeças das duas listas, escolha a menor, avance só nela e engate o nó na saída. É o passo de intercalação do mergesort, que volta na aula 9 — resolver esse aqui adianta a Prova 2.</li>
+</ol>
+</div></details>
+
+<h3>7.7 Simulado final</h3>
+
+<p>Faça em 50 minutos, no papel, sem consultar. Depois confira.</p>
+
+<p><strong>Questão 1 (2,0).</strong> Uma pilha (vetor, <code>MAX=4</code>, <code>topo</code> inicial -1) recebe: <code>push(1) push(2) push(3) pop() push(4) top() push(5) push(6)</code>. Diga o valor final de <code>topo</code>, o conteúdo do vetor por posição, o retorno de cada <code>pop</code>/<code>top</code>, e se alguma operação falhou.</p>
+
+<p><strong>Questão 2 (2,0).</strong> Escreva, em C, a função <code>int dequeue(Fila *f, int *saida)</code> para fila encadeada com <code>inicio</code> e <code>fim</code>, tratando todos os casos de borda. Comente as linhas críticas.</p>
+
+<p><strong>Questão 3 (2,0).</strong> Dada a lista <code>[7] -&gt; [3] -&gt; [9] -&gt; NULL</code>, desenhe o estado após <code>insere_pos(5, 1)</code> e depois <code>remove_valor(7)</code>, indicando quais ponteiros mudaram em cada passo.</p>
+
+<p><strong>Questão 4 (2,0).</strong> Escreva <code>int conta_pares(No *l)</code>, que devolve quantos elementos da lista são pares. Diga a complexidade e justifique.</p>
+
+<p><strong>Questão 5 (2,0).</strong> Um sistema recebe pedidos e precisa processá-los na ordem de chegada; cada pedido processado vai para um histórico onde consultamos sempre o mais recente. Que estruturas você usaria para cada parte? Justifique com base no comportamento (FIFO/LIFO) e diga a complexidade das operações envolvidas.</p>
+
+<details><summary>Gabarito comentado do simulado</summary><div class="conteudo">
+<p><strong>Q1.</strong></p>
+<pre class="diag">
+   op       retorno   topo   d[0] d[1] d[2] d[3]
+   push(1)     1       0      1    ?    ?    ?
+   push(2)     1       1      1    2    ?    ?
+   push(3)     1       2      1    2    3    ?
+   pop()       3       1      1    2    3    ?
+   push(4)     1       2      1    2    4    ?
+   top()       4       2      1    2    4    ?
+   push(5)     1       3      1    2    4    5
+   push(6)     0       3      1    2    4    5   &lt;- FALHOU: pilha cheia
+</pre>
+<p><code>topo = 3</code>, vetor <code>[1][2][4][5]</code>, <code>pop</code> devolveu 3, <code>top</code> devolveu 4, e o <code>push(6)</code> falhou porque <code>topo == MAX-1</code>.</p>
+
+<p><strong>Q2.</strong></p>
+<pre><code>int dequeue(Fila *f, int *saida) {
+    No *aux;
+    if (f-&gt;inicio == NULL) return 0;   /* fila vazia: nada a remover */
+
+    aux       = f-&gt;inicio;             /* guarda o nó que sai         */
+    *saida    = aux-&gt;info;
+    f-&gt;inicio = aux-&gt;prox;             /* início anda uma casa        */
+
+    if (f-&gt;inicio == NULL)             /* saiu o último elemento:     */
+        f-&gt;fim = NULL;                 /* fim não pode ficar pendurado*/
+
+    free(aux);                          /* libera só depois de usar prox */
+    return 1;
+}</code></pre>
+<p>Os três pontos que valem a nota: teste de fila vazia, atualização do <code>fim</code> quando a fila esvazia, e <code>free</code> depois de ler <code>aux-&gt;prox</code>.</p>
+
+<p><strong>Q3.</strong></p>
+<pre class="diag">
+   inicial          [7] -&gt; [3] -&gt; [9] -&gt; NULL
+
+   insere_pos(5,1): anterior = índice 0 = [7]
+     novo-&gt;prox = [3]       (liga o novo ao resto)
+     [7]-&gt;prox  = novo      (religa o anterior)
+                    [7] -&gt; [5] -&gt; [3] -&gt; [9] -&gt; NULL
+     ponteiros alterados: novo-&gt;prox e [7]-&gt;prox. A cabeça NÃO muda.
+
+   remove_valor(7): p = [7], ant = NULL (é o primeiro)
+     cabeça = p-&gt;prox = [5];  free([7])
+                    [5] -&gt; [3] -&gt; [9] -&gt; NULL
+     ponteiro alterado: a própria cabeça da lista.
+</pre>
+
+<p><strong>Q4.</strong></p>
+<pre><code>int conta_pares(No *l) {
+    int n = 0;
+    No *p;
+    for (p = l; p != NULL; p = p-&gt;prox)
+        if (p-&gt;info % 2 == 0)
+            n++;
+    return n;
+}</code></pre>
+<p>Complexidade Θ(n): o laço visita cada nó exatamente uma vez e faz um trabalho constante em cada um (um resto de divisão, uma comparação e, no máximo, um incremento). Não há como fazer melhor, já que todo elemento precisa ser examinado.</p>
+
+<p><strong>Q5.</strong> Os pedidos a processar vão em uma <strong>fila</strong>: a ordem de chegada é exatamente FIFO, com <code>enqueue</code> na chegada e <code>dequeue</code> no processamento, ambos Θ(1). O histórico consultado pelo mais recente é uma <strong>pilha</strong>: o último processado é o primeiro a ser consultado, LIFO, com <code>push</code> ao concluir e <code>top</code> na consulta, ambos Θ(1). Se o histórico também precisasse ser percorrido do mais antigo ao mais recente ou tivesse remoção no meio, a escolha passaria a ser uma lista ligada.</p>
+</div></details>
+
+<hr>
+
+<p class="rodape">Apostila de estudos para SI201 B — Estruturas de Dados I (2026/S2). Os tópicos seguem o cronograma das aulas 4, 5 e 6 do plano de ensino; o conteúdo detalhado é conhecimento geral da área alinhado à bibliografia básica da disciplina. Em caso de divergência de notação, vale o material do professor.</p>
+
+</div>
+
+<script>
+(function () {
+  var lista = document.getElementById('checklist');
+  if (!lista) return;
+  var caixas = lista.querySelectorAll('input[type="checkbox"]');
+
+  try {
+    var salvo = localStorage.getItem('si201-checklist');
+    if (salvo) {
+      var marcados = JSON.parse(salvo);
+      caixas.forEach(function (c) { c.checked = marcados.indexOf(c.id) !== -1; });
+    }
+  } catch (e) { /* sem armazenamento: a lista funciona normalmente, só não guarda */ }
+
+  lista.addEventListener('change', function () {
+    try {
+      var marcados = [];
+      caixas.forEach(function (c) { if (c.checked) marcados.push(c.id); });
+      localStorage.setItem('si201-checklist', JSON.stringify(marcados));
+    } catch (e) { /* ignora */ }
+  });
+})();
+</script>
+
+</body>
+</html>
