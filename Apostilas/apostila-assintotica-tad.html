@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SI201 — Pilhas, Filas e Listas Ligadas em C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --papel:#F4F6F5;
+  --papel-2:#FFFFFF;
+  --tinta:#14201E;
+  --tinta-fraca:#4C5C59;
+  --linha:#D5DDDA;
+  --teal:#15605A;
+  --teal-claro:#E3EFEC;
+  --azul:#274A8A;
+  --facil:#2E7D4F;
+  --medio:#9A6B05;
+  --dificil:#A62B21;
+  --codigo-bg:#10211F;
+  --codigo-tx:#DCE8E4;
+  --codigo-com:#7FA39C;
+  --codigo-kw:#7FD1C1;
+  --codigo-str:#E4C07A;
+  --sombra:0 1px 0 var(--linha);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --papel:#0E1614;
+    --papel-2:#141F1D;
+    --tinta:#E6EDEB;
+    --tinta-fraca:#9FB2AE;
+    --linha:#25332F;
+    --teal:#6FCBBB;
+    --teal-claro:#17302C;
+    --azul:#9CB8EE;
+    --facil:#6BC08D;
+    --medio:#D9AE4E;
+    --dificil:#E8897F;
+    --codigo-bg:#08100F;
+    --codigo-tx:#DCE8E4;
+  }
+}
+:root[data-theme="dark"]{
+  --papel:#0E1614;
+  --papel-2:#141F1D;
+  --tinta:#E6EDEB;
+  --tinta-fraca:#9FB2AE;
+  --linha:#25332F;
+  --teal:#6FCBBB;
+  --teal-claro:#17302C;
+  --azul:#9CB8EE;
+  --facil:#6BC08D;
+  --medio:#D9AE4E;
+  --dificil:#E8897F;
+  --codigo-bg:#08100F;
+  --codigo-tx:#DCE8E4;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{
+  margin:0;
+  background:var(--papel);
+  color:var(--tinta);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:18px;
+  line-height:1.65;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:46rem;margin:0 auto;padding:0 1.25rem 5rem}
+h1,h2,h3,h4,.mono-h{font-family:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;line-height:1.15;font-weight:700}
+h2{font-size:1.9rem;margin:3.5rem 0 .3rem;letter-spacing:-.01em}
+h3{font-size:1.3rem;margin:2.4rem 0 .5rem;color:var(--teal)}
+h4{font-size:1.05rem;margin:1.8rem 0 .3rem}
+p{margin:.85rem 0}
+a{color:var(--azul)}
+code{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:var(--teal-claro);padding:.1em .35em;border-radius:3px;word-break:break-word}
+pre{
+  font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  background:var(--codigo-bg);color:var(--codigo-tx);
+  padding:1rem 1.1rem;border-radius:6px;overflow-x:auto;
+  font-size:.8rem;line-height:1.55;margin:1rem 0;
+}
+pre code{background:none;padding:0;font-size:inherit;color:inherit}
+.c{color:var(--codigo-com);font-style:italic}
+.k{color:var(--codigo-kw)}
+.s{color:var(--codigo-str)}
+pre.diag{
+  background:var(--papel-2);color:var(--tinta);
+  border:1px solid var(--linha);border-left:3px solid var(--teal);
+  font-size:.78rem;line-height:1.5;
+}
+/* cabeçalho fixo */
+.barra{
+  position:sticky;top:0;z-index:20;background:var(--papel);
+  border-bottom:1px solid var(--linha);
+  font-family:"Bricolage Grotesque",Arial,sans-serif;font-size:.78rem;
+}
+.barra-in{max-width:46rem;margin:0 auto;padding:.55rem 1.25rem;display:flex;gap:.9rem;overflow-x:auto;white-space:nowrap}
+.barra a{color:var(--tinta-fraca);text-decoration:none;font-weight:500}
+.barra a:hover,.barra a:focus{color:var(--teal)}
+/* hero */
+.hero{border-bottom:1px solid var(--linha);padding:3rem 0 2.2rem;margin-bottom:1rem}
+.hero h1{font-size:clamp(2rem,7vw,3.1rem);margin:.2rem 0 .6rem;letter-spacing:-.02em}
+.hero .sub{color:var(--tinta-fraca);font-size:1.02rem;margin:0}
+.hero pre{margin-top:1.8rem}
+.selo{font-family:"Bricolage Grotesque",Arial,sans-serif;font-size:.8rem;color:var(--teal);font-weight:700}
+/* blocos */
+.nota,.alerta,.dica{
+  border:1px solid var(--linha);border-left:3px solid var(--teal);
+  background:var(--papel-2);padding:.85rem 1rem;margin:1.3rem 0;border-radius:0 5px 5px 0;font-size:.95rem;
+}
+.alerta{border-left-color:var(--dificil)}
+.dica{border-left-color:var(--medio)}
+.nota p:first-child,.alerta p:first-child,.dica p:first-child{margin-top:0}
+.nota p:last-child,.alerta p:last-child,.dica p:last-child{margin-bottom:0}
+.rotulo{font-family:"Bricolage Grotesque",Arial,sans-serif;font-weight:700;font-size:.82rem;display:block;margin-bottom:.15rem}
+.alerta .rotulo{color:var(--dificil)}
+.dica .rotulo{color:var(--medio)}
+.nota .rotulo{color:var(--teal)}
+/* tabelas */
+.tabela{overflow-x:auto;margin:1.2rem 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:30rem}
+th,td{border:1px solid var(--linha);padding:.45rem .6rem;text-align:left;vertical-align:top}
+th{background:var(--teal-claro);font-family:"Bricolage Grotesque",Arial,sans-serif;font-size:.8rem}
+tbody tr:nth-child(even){background:var(--papel-2)}
+/* exercícios */
+.ex{border-top:1px solid var(--linha);padding-top:1rem;margin-top:1.6rem}
+.nivel{font-family:"Bricolage Grotesque",Arial,sans-serif;font-weight:700;font-size:.78rem}
+.n1{color:var(--facil)}.n2{color:var(--medio)}.n3{color:var(--dificil)}
+.espaco{border:1px dashed var(--linha);border-radius:5px;height:3.5rem;margin:.8rem 0;display:flex;align-items:center;justify-content:center;color:var(--tinta-fraca);font-size:.8rem;font-family:"Bricolage Grotesque",Arial,sans-serif}
+details{margin:.8rem 0;border:1px solid var(--linha);border-radius:5px;background:var(--papel-2)}
+summary{cursor:pointer;padding:.6rem .9rem;font-family:"Bricolage Grotesque",Arial,sans-serif;font-weight:700;font-size:.88rem;color:var(--teal);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";display:inline-block;transition:transform .15s}
+details[open] summary::before{content:"▾ "}
+details .conteudo{padding:0 .9rem .6rem;border-top:1px solid var(--linha)}
+details .conteudo pre{font-size:.76rem}
+/* resumo de capítulo */
+.resumo{background:var(--teal-claro);border-radius:6px;padding:1rem 1.2rem;margin:2.2rem 0 1rem}
+.resumo h4{margin-top:0;color:var(--teal)}
+.resumo ul{margin:.4rem 0 0;padding-left:1.1rem}
+.resumo li{margin:.3rem 0;font-size:.93rem}
+/* checklist */
+.check{list-style:none;padding:0;margin:1rem 0}
+.check li{display:flex;gap:.6rem;align-items:flex-start;padding:.35rem 0;border-bottom:1px dashed var(--linha);font-size:.93rem}
+.check input{margin-top:.45rem;accent-color:var(--teal);width:1rem;height:1rem;flex:none}
+.check input:checked + span{color:var(--tinta-fraca);text-decoration:line-through}
+ul,ol{padding-left:1.2rem}
+li{margin:.35rem 0}
+hr{border:none;border-top:1px solid var(--linha);margin:3rem 0}
+.rodape{color:var(--tinta-fraca);font-size:.85rem;border-top:1px solid var(--linha);padding-top:1rem;margin-top:3rem}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+@media (max-width:480px){body{font-size:17px}pre{font-size:.72rem}}
+</style>
+</head>
+<body>
+<nav class="barra" aria-label="Capítulos">
+  <div class="barra-in">
+    <a href="#cap1">1. Notação O</a>
+    <a href="#cap2">2. Notação Θ</a>
+    <a href="#cap3">3. Tempo de execução</a>
+    <a href="#cap4">4. TAD</a>
+    <a href="#cap5">5. Para a prova</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="selo">SI201 B — Estruturas de Dados I · Prova 1 (aulas 1-3)</span>
+  <h1>Notação Assintótica e Tipo Abstrato de Dados</h1>
+  <p class="sub">Baseada na apostila do prof. Luis Meira: notação O e Θ, tempo de execução de algoritmos, e TAD.</p>
+<pre class="diag">
+   f(n) = O(g(n))              f(n) = Θ(g(n))
+   "f nao cresce mais          "f cresce NO MESMO RITMO
+    rapido que g"                que g, a menos de constante"
+
+     c*g(n)  ___,--             c2*g(n) ___,--
+            /                          /    f(n)
+     f(n)__/                    f(n)__/  \
+                                  c1*g(n)  \__
+   ----------|----&gt; n          ----------|----&gt; n
+             n0                          n0
+   (limitante SUPERIOR)         (limitante SUPERIOR e INFERIOR)
+</pre>
+</header>
+
+<div class="nota">
+  <span class="rotulo">Sobre a origem do conteúdo</span>
+  <p>Esta apostila segue de perto a apostila oficial da disciplina (capítulos 1.4, 2.1, 3.1 e 3.2, escritos pelo prof. Meira), reorganizando o conteúdo em formato de estudo, com explicações passo a passo e exercícios próprios para praticar. Os enunciados numerados ("Questão X") do material original ficam só como referência — resolva-os direto na apostila do professor; aqui você treina com variações equivalentes.</p>
+</div>
+
+<h2 id="cap1">1. Notação O (lê-se "ó")</h2>
+
+<h3>1.1 A ideia intuitiva</h3>
+
+<p>Imagine que você está comparando dois corredores em uma maratona de 10 km. Um deles as vezes acelera, as vezes desacelera, mas você sabe que <strong>nunca</strong> vai ultrapassar um ritmo de 6 min/km a partir do 3º km. Essa é a essência do O: um <strong>teto</strong> de crescimento, válido a partir de um certo ponto, e ignorando os primeiros quilômetros (valores pequenos de <code>n</code>).</p>
+
+<p>Em algoritmos, "ritmo de crescimento" é o número de operações (ou o tempo) em função do tamanho da entrada <code>n</code>. Dizer que um algoritmo é O(n²) é dizer: "o número de operações nunca cresce mais rápido que n², a partir de um certo tamanho de entrada".</p>
+
+<h3>1.2 Definição formal</h3>
+
+<div class="nota">
+  <span class="rotulo">f(n) = O(g(n))</span>
+  <p>Existem duas constantes positivas <code>c</code> e <code>n₀</code> tais que <code>0 ≤ f(n) ≤ c·g(n)</code>, para todo <code>n &gt; n₀</code>.</p>
+</div>
+
+<p>Duas liberdades que a definição te dá, e que são exatamente o que faz a notação assintótica ser útil:</p>
+
+<ul>
+  <li><strong>Você pode ignorar valores pequenos de <code>n</code></strong> — a desigualdade só precisa valer a partir de <code>n₀</code>, não desde o início.</li>
+  <li><strong>Você pode escolher a constante <code>c</code></strong> — não precisa ser 1; pode ser 20, 1000, o que for necessário para a desigualdade fechar.</li>
+</ul>
+
+<h3>1.3 Prova passo a passo</h3>
+
+<p>Vamos mostrar que <code>10n² + 5n + 5 = O(n²)</code>. A primeira tentativa ingênua, com <code>c = 10</code>, falha:</p>
+
+<pre class="diag">
+   tentativa:  10n² + 5n + 5 ≤ 10n²   para todo n &gt; 0     FALSO
+               (o lado esquerdo tem 5n+5 sobrando)
+</pre>
+
+<p>A saída é ser generoso com a constante. Se assumirmos <code>n &gt; 1</code>, então <code>n ≤ n²</code> e <code>1 ≤ n²</code> — então trocamos cada termo pequeno por um <code>n²</code> "que cobre ele":</p>
+
+<pre class="diag">
+   10n² + 5n + 5  ≤  10n² + 5n² + 5n²   (trocando n por n² e 1 por n², vale p/ n&gt;1)
+                  =  20n²
+</pre>
+
+<p>Prova fechada: existem <code>c = 20</code> e <code>n₀ = 1</code> tais que <code>10n² + 5n + 5 ≤ 20n²</code> para todo <code>n &gt; 1</code>. Logo, <code>10n² + 5n + 5 = O(n²)</code>.</p>
+
+<div class="dica">
+  <span class="rotulo">O truque que se repete em toda prova de O</span>
+  <p>Sempre que aparecer um termo de grau menor (<code>5n</code>, <code>5</code>) somado a um termo de grau maior (<code>10n²</code>), assuma <code>n &gt; 1</code> e troque cada termo menor por <code>n²</code> — como <code>n ≤ n²</code> e <code>1 ≤ n²</code> nessa faixa, a troca só aumenta o lado direito, o que é permitido numa prova de limitante superior.</p>
+</div>
+
+<h3>1.4 O que O(n²) realmente agrupa</h3>
+
+<p>Todas as funções abaixo são O(n²): <code>100n²</code>, <code>5n² + 5n</code>, <code>5n² + log n</code>. A notação joga fora a constante multiplicativa e os termos de ordem menor — o que importa, para <code>n</code> grande, é só o termo dominante. Por isso <code>5n²</code> e <code>1.000.000n²</code> têm exatamente a mesma classe de complexidade O(n²).</p>
+
+<p>Isso gera famílias de algoritmos com nome próprio:</p>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Notação</th><th>Nome</th><th>Exemplo de operação</th></tr></thead>
+<tbody>
+<tr><td>O(1)</td><td>constante</td><td>acessar <code>v[5]</code></td></tr>
+<tr><td>O(log n)</td><td>logarítmico</td><td>busca binária</td></tr>
+<tr><td>O(n)</td><td>linear</td><td>um <code>for</code> simples</td></tr>
+<tr><td>O(n log n)</td><td>quasilinear</td><td>bons algoritmos de ordenação</td></tr>
+<tr><td>O(n²)</td><td>quadrático</td><td>dois <code>for</code> aninhados</td></tr>
+<tr><td>O(n³)</td><td>cúbico</td><td>três <code>for</code> aninhados</td></tr>
+<tr><td>O(2ⁿ)</td><td>exponencial</td><td>testar todos os subconjuntos</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="alerta">
+  <span class="rotulo">Onde a folga aparece — e onde a notação "quebra"</span>
+  <p>É verdade que <code>n = O(n²)</code> (folga: o limitante é bem mais alto que o necessário), mas <code>n = O(n)</code> é uma afirmação <strong>justa</strong> (sem folga). Já <code>n = O(√n)</code> é <strong>falsa</strong>: por maior que seja a constante <code>c</code> escolhida, sempre existe um <code>n</code> grande o bastante para que <code>n</code> ultrapasse <code>c√n</code> — porque <code>n</code> cresce mais rápido que <code>√n</code>, e nenhuma constante segura essa diferença para sempre.</p>
+</div>
+
+<h3>1.5 Contando operações de um código real</h3>
+
+<pre><code><span class="k">int</span> x = <span class="s">0</span>;
+<span class="k">for</span> (<span class="k">int</span> i = <span class="s">0</span>; i &lt; n; i++) {
+    x = x + <span class="s">3</span>;
+}
+</code></pre>
+
+<p>Contando cada linha: a declaração e atribuição de <code>x</code> custa 2 operações; o <code>for</code> executa a comparação <code>i&lt;n</code> um total de <code>n+1</code> vezes (a última vez é a que falha e encerra o laço), o incremento <code>i++</code> ocorre <code>n</code> vezes, e o corpo <code>x=x+3</code> ocorre <code>n</code> vezes. Somando tudo, <code>T(n) = 3n + 5</code> (aproximadamente — o exato depende de como você conta a inicialização do laço). O que importa: <code>T(n) = O(n)</code>. Não interessa a constante 3 nem o +5 — só que o algoritmo é <strong>linear</strong>.</p>
+
+<h3>1.6 Exercícios</h3>
+
+<div class="ex">
+<p><span class="nivel n1">🟢 O1.</span> Mostre que <code>7n³ + 2n + 100 = O(n³)</code>. Que constantes <code>c</code> e <code>n₀</code> você usaria?</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p>Assuma <code>n &gt; 1</code>. Então <code>n ≤ n³</code> e <code>1 ≤ n³</code>, então:</p>
+<pre class="diag">
+   7n³ + 2n + 100 ≤ 7n³ + 2n³ + 100n³ = 109n³,  para n &gt; 1
+</pre>
+<p>Constantes: <code>c = 109</code>, <code>n₀ = 1</code>. (Qualquer <code>c</code> maior que 109 também funcionaria — a prova não pede a melhor constante, só uma que feche.)</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 O2.</span> Explique por que <code>n² ≠ O(n)</code>, mostrando a contradição a que se chega ao tentar provar o contrário.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p>Suponha, por absurdo, que existam <code>c</code> e <code>n₀</code> tais que <code>n² ≤ cn</code> para todo <code>n &gt; n₀</code>. Dividindo os dois lados por <code>n</code> (válido, pois <code>n &gt; 0</code>): <code>n ≤ c</code>. Isso diria que <code>n</code> nunca ultrapassa a constante <code>c</code> — mas <code>n</code> cresce sem limite, então qualquer <code>c</code> escolhido será ultrapassado por algum <code>n</code> maior que ele. Contradição. Logo, não existe tal <code>c</code>, e <code>n² ≠ O(n)</code>.</p>
+</div></details>
+</div>
+
+<h2 id="cap2">2. Notação Θ (lê-se "teta")</h2>
+
+<h3>2.1 A ideia intuitiva</h3>
+
+<p>Se O é só o teto, Θ é o "sanduíche": a função fica <strong>presa entre um piso e um teto</strong>, os dois proporcionais a <code>g(n)</code>, a partir de um certo ponto. Enquanto O permite folga (dizer <code>n = O(n²)</code> é válido, mesmo sendo uma afirmação frouxa), Θ exige que a função realmente cresça <strong>no mesmo ritmo</strong> de <code>g(n)</code>.</p>
+
+<h3>2.2 Definição formal</h3>
+
+<div class="nota">
+  <span class="rotulo">f(n) = Θ(g(n))</span>
+  <p>Existem três constantes positivas <code>c₁</code>, <code>c₂</code> e <code>n₀</code> tais que <code>0 ≤ c₁·g(n) ≤ f(n) ≤ c₂·g(n)</code>, para todo <code>n &gt; n₀</code>.</p>
+</div>
+
+<p>Repare que a prova de Θ é <strong>duas provas de O em direções opostas</strong>: uma parte mostra que <code>f(n)</code> não cresce mais rápido que <code>g(n)</code> (o limite superior, igual ao que você já sabe fazer), e a outra mostra que <code>f(n)</code> não cresce mais devagar (o limite inferior).</p>
+
+<h3>2.3 Prova passo a passo</h3>
+
+<p>Vamos mostrar que <code>f(n) = 100n² + 100n + 100 = Θ(n²)</code>, assumindo <code>n &gt; 1</code>.</p>
+
+<p><strong>Lado de cima</strong> (mesmo raciocínio do capítulo 1):</p>
+<pre class="diag">
+   100n² + 100n + 100  ≤  100n² + 100n² + 100n² = 300n²
+</pre>
+
+<p><strong>Lado de baixo</strong> — aqui a prova costuma ser mais simples, porque geralmente basta usar o próprio termo dominante da função, sem nem precisar de constante:</p>
+<pre class="diag">
+   n²  ≤  100n² + 100n + 100     (obviamente verdade, já que só somamos termos positivos)
+</pre>
+
+<p>Prova fechada: <code>c₁ = 1</code>, <code>c₂ = 300</code>, <code>n₀ = 1</code>, então <code>1·n² ≤ f(n) ≤ 300·n²</code> para todo <code>n &gt; 1</code>. Logo <code>f(n) = Θ(n²)</code>.</p>
+
+<h3>2.4 A relação entre O e Θ</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>Afirmação</th><th>Verdadeira?</th></tr></thead>
+<tbody>
+<tr><td>Se f(n) = Θ(g(n)), então f(n) = O(g(n))</td><td>Sim — Θ é mais forte, então implica O</td></tr>
+<tr><td>Se f(n) = O(g(n)), então f(n) = Θ(g(n))</td><td>Não necessariamente — O(g(n)) permite folga (ex: n = O(n²) mas n ≠ Θ(n²))</td></tr>
+<tr><td>Se f(n) = Θ(g(n)), então g(n) = Θ(f(n))</td><td>Sim — a relação Θ é simétrica (o sanduíche funciona nos dois sentidos)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="dica">
+  <span class="rotulo">Regra prática pra decidir O vs Θ numa questão</span>
+  <p>Se a pergunta pede "um limitante" ou "prove que não é pior que", geralmente é O. Se pede "a complexidade exata" ou "o comportamento justo", é Θ. Na prática, quando você consegue provar os dois lados (superior e inferior) com a <strong>mesma</strong> função <code>g(n)</code>, a resposta correta e mais informativa é sempre Θ — é isso que a maioria dos algoritmos que você vai analisar no curso tem.</p>
+</div>
+
+<h3>2.5 Exercícios</h3>
+
+<div class="ex">
+<p><span class="nivel n1">🟢 T1.</span> Mostre que <code>50n² + 3n = Θ(n²)</code>.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p>Assumindo <code>n &gt; 1</code>: lado de cima, <code>50n² + 3n ≤ 50n² + 3n² = 53n²</code>. Lado de baixo, <code>n² ≤ 50n² + 3n</code> (trivial, pois <code>50n²</code> já é maior que <code>n²</code>, e <code>3n</code> só soma). Constantes: <code>c₁=1</code>, <code>c₂=53</code>, <code>n₀=1</code>.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 T2.</span> Dado um polinômio de grau <code>k</code>, <code>P(n) = a₀ + a₁n + ... + aₖnᵏ</code> (com <code>aₖ &gt; 0</code>), explique em palavras (sem álgebra pesada) por que <code>P(n) = Θ(nᵏ)</code>.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<p>Para <code>n</code> grande, o termo <code>aₖnᵏ</code> domina todos os outros — cada termo de grau menor cresce mais devagar e se torna insignificante perto dele. Isso garante o teto: a soma toda fica limitada por uma constante vezes <code>nᵏ</code> (some cada termo menor "arredondado pra cima" até <code>nᵏ</code>, igual fizemos nos exemplos anteriores). E o próprio termo <code>aₖnᵏ</code> sozinho já garante o piso, porque os demais termos (assumindo coeficientes não negativos, ou considerando valores grandes de <code>n</code> onde o termo dominante já supera a soma dos negativos) não derrubam a soma abaixo de uma fração de <code>nᵏ</code>. Como as duas pontas usam a mesma função <code>nᵏ</code>, o resultado é Θ(nᵏ), não apenas O(nᵏ).</p>
+</div></details>
+</div>
+
+<h2 id="cap3">3. Tempo de execução de algoritmos</h2>
+
+<h3>3.1 Do código para a fórmula</h3>
+
+<p>Considere dois <code>for</code> aninhados:</p>
+
+<pre><code><span class="k">for</span> (<span class="k">int</span> i = <span class="s">0</span>; i &lt; n; i++) {
+    <span class="k">for</span> (<span class="k">int</span> j = <span class="s">0</span>; j &lt; n; j++) {
+        v[i] = i + j;
+    }
+}
+</code></pre>
+
+<p>O laço interno gasta <code>3n + 2</code> operações por execução (a condição roda <code>n+1</code> vezes, o incremento e a atribuição rodam <code>n</code> vezes cada). Como o laço externo repete isso <code>n</code> vezes, e ele próprio já gasta <code>2n+2</code>:</p>
+
+<pre class="diag">
+   T(n) = (2n+2) + n·(3n+2) = 3n² + 4n + 2  =  Θ(n²)
+</pre>
+
+<p>Para <code>n = 1000</code>, o termo <code>3n²</code> vale 3 milhões, enquanto <code>4n+2</code> vale só 4002 — menos de 0,15% do total. É por isso que jogamos fora os termos de ordem menor: eles não mudam a resposta de forma perceptível, e a notação assintótica existe justamente para simplificar sem perder o que importa.</p>
+
+<h3>3.2 Por que a constante quase não importa (e quando importa)</h3>
+
+<p>Compare dois programas: <code>T₁(n) = n·10⁻⁶s</code> (linear) e <code>T₂(n) = n²·10⁻⁶s</code> (quadrático). Para <code>n = 1.000.000</code>:</p>
+
+<div class="tabela">
+<table>
+<thead><tr><th></th><th>Fórmula</th><th>Tempo</th></tr></thead>
+<tbody>
+<tr><td>T₁ (linear)</td><td>10⁶ · 10⁻⁶</td><td>1 segundo</td></tr>
+<tr><td>T₂ (quadrático)</td><td>(10⁶)² · 10⁻⁶</td><td>1.000.000 s ≈ 11,5 dias</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Um algoritmo Θ(n²) no lugar de um Θ(n) fica <strong>um milhão de vezes mais lento</strong> para essa entrada — mesmo que as duas constantes de tempo sejam idênticas. É exatamente por isso que a análise assintótica interessa mais que uma constante de 2x ou 3x: a diferença entre classes de complexidade domina qualquer constante.</p>
+
+<div class="alerta">
+  <span class="rotulo">Erro clássico de programador iniciante</span>
+  <p>Calcular a média dentro do <code>for</code> que calcula o desvio padrão — repetindo um cálculo Θ(n) dentro de um laço que já roda <code>n</code> vezes, virando sem necessidade um algoritmo Θ(n²). A correção: calcule a média <strong>uma vez</strong>, guarde numa variável, e use essa variável dentro do laço do desvio padrão — o algoritmo volta a ser Θ(n). Esse é o tipo de erro que "passa despercebido" para <code>n</code> pequeno e vira catastrófico para <code>n</code> grande.</p>
+</div>
+
+<h3>3.3 O erro da regra de três</h3>
+
+<p>Se um algoritmo Θ(n²) gasta 1s para um certo <code>n</code>, quanto gasta para <code>10n</code>? A resposta <strong>não</strong> é 10s — funções quadráticas não são lineares, então regra de três direta está errada.</p>
+
+<pre class="diag">
+   T(n)   = c·n²
+   T(10n) = c·(10n)² = 100·c·n² = 100·T(n)
+</pre>
+
+<p>Multiplicar o tamanho da entrada por 10 multiplica o tempo por <strong>100</strong> num algoritmo quadrático — não por 10. Em um algoritmo cúbico (Θ(n³)), multiplicaria por 1000. Em geral, num algoritmo Θ(nᵏ), aumentar a entrada em um fator <code>m</code> multiplica o tempo por <code>mᵏ</code>.</p>
+
+<h3>3.4 Estimando quanto <code>n</code> cabe em um tempo dado</h3>
+
+<p>Um tipo de questão muito comum: dado <code>f(n)</code> e um tempo-limite <code>t</code>, qual o maior <code>n</code> que o algoritmo resolve nesse tempo? A receita é sempre a mesma: igualar <code>f(n)·10⁻⁶s</code> (tempo em microssegundos convertido pra segundos) ao tempo-limite, e isolar <code>n</code>.</p>
+
+<p><strong>Exemplo — f(n) = n², tempo-limite = 1 dia:</strong></p>
+
+<pre class="diag">
+   n² · 10⁻⁶ s  =  86.400 s        (1 dia = 24·3600 s)
+   n²           =  86.400 · 10⁶
+   n            =  √(86.400 · 10⁶)  ≈  293.938
+</pre>
+
+<p><strong>Exemplo — f(n) = 2ⁿ, tempo-limite = 1 século:</strong></p>
+
+<pre class="diag">
+   2ⁿ · 10⁻⁶ s  =  100·365,25·24·3600 s  ≈ 3,156 × 10⁹ s
+   2ⁿ          =  3,156 × 10¹⁵
+   n            =  log₂(3,156 × 10¹⁵)  ≈  51,5   →   n = 51
+</pre>
+
+<p>Compare os dois resultados: um algoritmo quadrático resolve quase 300 mil elementos em um dia; um algoritmo exponencial mal resolve 51 elementos em um <strong>século</strong>. Essa é a distância entre "polinomial" e "exponencial" — e é o motivo pelo qual, em estrutura de dados, o objetivo quase sempre é <strong>baixar a classe de complexidade</strong> (de Θ(n²) para Θ(n log n), de Θ(n) para Θ(log n)), não só otimizar constantes.</p>
+
+<h3>3.5 Tabela de referência: crescimento das funções</h3>
+
+<div class="tabela">
+<table>
+<thead><tr><th>f(n)</th><th>Categoria</th><th>Ritmo de crescimento</th></tr></thead>
+<tbody>
+<tr><td>log n</td><td>logarítmico</td><td>cresce devagar — dobrar n soma só uma constante ao valor</td></tr>
+<tr><td>√n</td><td>sub-linear</td><td>mais rápido que log, mais devagar que linear</td></tr>
+<tr><td>n</td><td>linear</td><td>dobrar n dobra o valor</td></tr>
+<tr><td>n log n</td><td>quasilinear</td><td>um pouco pior que linear</td></tr>
+<tr><td>n²</td><td>quadrático</td><td>dobrar n multiplica o valor por 4</td></tr>
+<tr><td>n³</td><td>cúbico</td><td>dobrar n multiplica o valor por 8</td></tr>
+<tr><td>2ⁿ</td><td>exponencial</td><td>somar 1 a n dobra o valor</td></tr>
+<tr><td>n!</td><td>fatorial</td><td>cresce ainda mais rápido que exponencial</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.6 Multiplicação de matrizes: um exemplo clássico</h3>
+
+<p>Somar duas matrizes <code>n×n</code> é Θ(n²) (dois <code>for</code> aninhados percorrendo cada posição uma vez). <strong>Multiplicar</strong> é mais caro: calcular um único elemento <code>aᵢⱼ</code> do resultado exige um produto interno de uma linha por uma coluna, Θ(n) operações — e existem <code>n²</code> elementos para calcular, então o total é <strong>Θ(n³)</strong> pelo algoritmo direto (o "escolar").</p>
+
+<div class="dica">
+  <span class="rotulo">Curiosidade que aparece na apostila do professor</span>
+  <p>Existem algoritmos assintoticamente melhores que Θ(n³) para multiplicar matrizes (o algoritmo de Strassen chega perto de O(n^2,807)), e a pesquisa nessa área continua ativa até hoje. Não é o algoritmo que você vai implementar no curso, mas é um bom exemplo de que "óbvio" nem sempre é ótimo.</p>
+</div>
+
+<h3>3.7 Exercícios</h3>
+
+<div class="ex">
+<p><span class="nivel n1">🟢 TE1.</span> Um algoritmo tem <code>T(n) = n³·10⁻⁶s</code>. Se ele processa <code>n = 10.000</code> em 1000 segundos, qual a constante de tempo real (ajustando a fórmula aos dados medidos)? Com essa constante, quanto tempo levaria para <code>n = 10⁶</code>?</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre class="diag">
+   T(n) = c·n³
+   1000 = c · (10.000)³ = c · 10¹²
+   c    = 1000 / 10¹²  = 10⁻⁹ s
+
+   T(10⁶) = 10⁻⁹ · (10⁶)³ = 10⁻⁹ · 10¹⁸ = 10⁹ s ≈ 31,7 anos
+</pre>
+<p>Aumentar <code>n</code> em 100x (de 10⁴ para 10⁶) aumenta o tempo em 100³ = 1.000.000 de vezes — de 1000s para praticamente 32 anos. É o mesmo raciocínio da regra de três "certa" da seção 3.3, aplicado a um algoritmo cúbico.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 TE2.</span> Um algoritmo tem <code>f(n) = n</code> e um segundo tem <code>f(n) = n log n</code>, ambos com constante de tempo 10⁻⁶s. Para <code>n = 10⁹</code>, qual a razão aproximada entre os dois tempos? (use <code>log₂(10⁹) ≈ 29,9</code>)</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre class="diag">
+   T_linear(n)      = n · 10⁻⁶s
+   T_nlogn(n)       = n log n · 10⁻⁶s
+
+   razão = T_nlogn / T_linear = log n ≈ 29,9
+</pre>
+<p>O algoritmo <code>n log n</code> é cerca de 30 vezes mais lento que o linear nesse tamanho de entrada — bem menos dramático que a diferença entre linear e quadrático (que seria um fator de <code>n</code> inteiro, ou seja, um bilhão de vezes). Isso mostra por que <code>n log n</code> é considerado "quase tão bom quanto linear" na prática.</p>
+</div></details>
+</div>
+
+<h2 id="cap4">4. Tipo Abstrato de Dados (TAD)</h2>
+
+<h3>4.1 A ideia central: separar uso de implementação</h3>
+
+<p>Um TAD é um contrato: ele diz <strong>o que</strong> uma estrutura faz (suas operações), sem amarrar quem a usa aos detalhes de <strong>como</strong> ela é implementada por dentro. Você implementa a estrutura <strong>uma vez</strong> e a reutiliza em qualquer programa futuro, sem nunca mais reescrever o código interno.</p>
+
+<pre class="diag">
+   Quem USA a estrutura                    Quem IMPLEMENTA a estrutura
+   -----------------------                 ----------------------------
+   newCoordenada(10, 20)                   struct Coordenada { int x, y; };
+   printCoordenada(c)                      Coordenada* newCoordenada(...) {...}
+   euclideanDist(c1, c2)                   void printCoordenada(...) {...}
+                                            double euclideanDist(...) {...}
+
+   Não precisa saber COMO                  Pode mudar a implementação
+   funciona por dentro                     sem que o uso mude nada
+</pre>
+
+<p>Isso é o mesmo motivo pelo qual, no capítulo de pilhas, você conseguiu trocar a implementação de vetor para lista ligada sem alterar uma linha do código que usa <code>push</code>/<code>pop</code> — essa é a vantagem prática de pensar em TAD.</p>
+
+<h3>4.2 O padrão que se repete: struct + construtor + operações + uso</h3>
+
+<p>Todo TAD no curso segue as mesmas quatro etapas:</p>
+
+<ol>
+  <li><strong>Struct</strong> — define os campos que a estrutura guarda.</li>
+  <li><strong>Construtor</strong> (<code>newAlgumaCoisa</code>) — aloca dinamicamente e preenche os campos.</li>
+  <li><strong>Operações</strong> — funções que atuam sobre a estrutura (imprimir, calcular, comparar).</li>
+  <li><strong>Uso</strong> — o código (geralmente o <code>main</code>) que chama tudo isso, sem conhecer os detalhes internos.</li>
+</ol>
+
+<h3>4.3 Exemplo completo: Coordenada e Segmento</h3>
+
+<pre><code><span class="k">typedef</span> <span class="k">struct</span> Coordenada {
+    <span class="k">int</span> x, y;
+} Coordenada;
+
+Coordenada* newCoordenada(<span class="k">int</span> x, <span class="k">int</span> y){
+    Coordenada *aux = (Coordenada*) malloc(<span class="k">sizeof</span>(Coordenada));
+    aux-&gt;x = x;
+    aux-&gt;y = y;
+    <span class="k">return</span> aux;
+}
+
+<span class="k">void</span> printCoordenada(Coordenada *c){
+    printf(<span class="s">"(%d,%d)"</span>, c-&gt;x, c-&gt;y);
+}
+
+<span class="k">double</span> euclideanDist(Coordenada *c1, Coordenada *c2){
+    <span class="k">double</span> dx = (c1-&gt;x) - (c2-&gt;x);
+    <span class="k">double</span> dy = (c1-&gt;y) - (c2-&gt;y);
+    <span class="k">return</span> sqrt(dx*dx + dy*dy);
+}
+</code></pre>
+
+<p>Repare: <code>newCoordenada</code> faz duas coisas e só duas — aloca com <code>malloc</code> e preenche os campos. Essa separação (alocar + preencher, sempre juntas numa função construtora) é a convenção que o curso todo vai seguir, e é diretamente inspirada em como construtores funcionam em linguagens orientadas a objetos, adaptada para C.</p>
+
+<p>Em cima de <code>Coordenada</code>, o livro constrói <code>Segmento</code> — uma estrutura composta por <strong>duas coordenadas</strong>:</p>
+
+<pre><code><span class="k">typedef</span> <span class="k">struct</span> Segmento {
+    Coordenada *ini, *fim;
+} Segmento;
+
+Segmento* newSegmento(Coordenada *ini, Coordenada *fim){
+    Segmento *aux = (Segmento*) malloc(<span class="k">sizeof</span>(Segmento));
+    aux-&gt;ini = ini;
+    aux-&gt;fim = fim;
+    <span class="k">return</span> aux;
+}
+
+<span class="k">double</span> comprimentoSegmento(Segmento *s){
+    <span class="k">return</span> euclideanDist(s-&gt;ini, s-&gt;fim);   <span class="c">/* reaproveita a operação de Coordenada */</span>
+}
+</code></pre>
+
+<p>Isso ilustra outro ponto importante: <strong>TADs se combinam</strong>. <code>Segmento</code> não reimplementa distância euclidiana — ele reusa a operação que já existe em <code>Coordenada</code>. Testei o exemplo completo (com <code>main</code>, <code>printSegmento</code> etc) e a saída bate exatamente com a do livro:</p>
+
+<pre class="diag">
+   (10,10)
+   (20,20)
+   Distancia 14.14
+   [(10,10)(20,20)]
+   Comprimento:14.14
+</pre>
+
+<h3>4.4 Um TAD mais complexo: Polígono</h3>
+
+<p>O livro estende a ideia para um polígono — um vetor de coordenadas, com um contador indicando quantas estão em uso:</p>
+
+<pre><code><span class="k">typedef</span> <span class="k">struct</span> Poligono {
+    Coordenada *v[<span class="s">100</span>];
+    <span class="k">int</span> top;      <span class="c">/* quantidade de coordenadas usadas (e a proxima posicao livre) */</span>
+} Poligono;
+</code></pre>
+
+<p>Repare que <code>top</code> tem exatamente o mesmo papel que teve na pilha com vetor: ele é ao mesmo tempo "quantos elementos existem" e "a próxima posição livre". A função que adiciona uma coordenada usa esse duplo papel de um jeito compacto:</p>
+
+<pre><code><span class="k">void</span> addCoord(Poligono *pol, Coordenada *c){
+    pol-&gt;v[pol-&gt;top++] = c;   <span class="c">/* usa top como índice, DEPOIS incrementa */</span>
+}
+</code></pre>
+
+<p>E o cálculo do perímetro soma a distância entre cada coordenada e a seguinte, fechando o polígono com a distância entre a última e a primeira:</p>
+
+<pre><code><span class="k">double</span> perimetro(Poligono *pol){
+    <span class="k">double</span> per = <span class="s">0</span>;
+    <span class="k">for</span> (<span class="k">int</span> i = <span class="s">0</span>; i &lt; pol-&gt;top - <span class="s">1</span>; i++){
+        per += euclideanDist(pol-&gt;v[i], pol-&gt;v[i+<span class="s">1</span>]);   <span class="c">/* lados consecutivos */</span>
+    }
+    <span class="k">if</span> (pol-&gt;top &gt; <span class="s">1</span>){
+        per += euclideanDist(pol-&gt;v[<span class="s">0</span>], pol-&gt;v[pol-&gt;top-<span class="s">1</span>]);  <span class="c">/* fecha a figura */</span>
+    }
+    <span class="k">return</span> per;
+}
+</code></pre>
+
+<p>Esse é exatamente o padrão de "percorrer pares consecutivos e depois fechar o ciclo" que reaparece sempre que se trabalha com figuras fechadas (polígonos, ciclos em grafos, etc).</p>
+
+<h3>4.5 Por que isso importa pra estrutura de dados como um todo</h3>
+
+<p>O motivo de o professor introduzir TAD logo na aula 3, antes de pilhas e filas, é que <strong>pilha, fila e lista ligada são TADs</strong>. "Pilha" é um contrato (empilhar, desempilhar, consultar o topo, testar se está vazia) que pode ser implementado com vetor <em>ou</em> lista ligada — e o código de quem usa a pilha não muda entre as duas implementações. É o mesmo princípio do <code>Segmento</code> reusando a distância de <code>Coordenada</code>: separar a interface (o que a estrutura promete fazer) da implementação (como ela faz por dentro).</p>
+
+<h3>4.6 Exercícios</h3>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 TAD1.</span> Escreva o construtor e a operação de "inverter" para uma estrutura <code>Segmento</code> — a operação deve trocar <code>ini</code> e <code>fim</code> de lugar, recebendo o segmento por referência (sem criar um novo).</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre><code>void inverteSegmento(Segmento *s){
+    Coordenada *aux = s->ini;
+    s->ini = s->fim;
+    s->fim = aux;
+}</code></pre>
+<p>É a mesma técnica de "trocar duas variáveis com uma auxiliar" que você já usa em outros contextos — aqui aplicada a dois ponteiros dentro da struct, sem alocar memória nova.</p>
+</div></details>
+</div>
+
+<div class="ex">
+<p><span class="nivel n2">🟡 TAD2.</span> Escreva uma função de translação para <code>Coordenada</code>: recebe a coordenada por referência e dois deslocamentos (<code>deltax</code>, <code>deltay</code>), somando-os às posições x e y.</p>
+<div class="espaco">tente antes de abrir</div>
+<details><summary>Resolução comentada</summary><div class="conteudo">
+<pre><code>void translacaoCoord(Coordenada *c, int deltax, int deltay){
+    c->x += deltax;
+    c->y += deltay;
+}</code></pre>
+<p>Passar por referência (ponteiro) é essencial aqui: se a coordenada fosse recebida por valor, a função alteraria uma cópia local e o efeito desapareceria ao retornar — o mesmo problema que você já viu em pilha, quando passar a struct por valor faz push/pop não alterarem o original.</p>
+</div></details>
+</div>
+
+<h2 id="cap5">5. O que eu preciso saber para a prova</h2>
+
+<h3>5.1 Checklist de conceitos</h3>
+
+<ul>
+  <li>Escrever de cor as definições formais de O e Θ (as duas usam "existem constantes positivas... tal que... para todo n &gt; n₀").</li>
+  <li>Provar que <code>f(n) = O(g(n))</code> ou <code>f(n) = Θ(g(n))</code> para um polinômio simples, assumindo <code>n &gt; 1</code> e trocando termos menores por potências do termo dominante.</li>
+  <li>Diferenciar O (só teto) de Θ (teto e piso) — e saber que Θ implica O, mas não o contrário.</li>
+  <li>Contar operações de um trecho de código (laços simples, laços aninhados) e chegar numa fórmula T(n).</li>
+  <li>Resolver "quanto n cabe em tempo t", isolando n numa equação com log, raiz ou potência.</li>
+  <li>Explicar por que regra de três direta está errada para funções não lineares.</li>
+  <li>Definir TAD e explicar a separação uso/implementação com um exemplo.</li>
+  <li>Reconhecer o padrão struct + construtor (<code>newX</code>) + operações + uso.</li>
+</ul>
+
+<h3>5.2 Erros e pegadinhas comuns</h3>
+
+<ol>
+  <li><strong>Confundir O e Θ</strong>: dizer que algo é Θ quando só se provou o limite superior (isso é só O).</li>
+  <li><strong>Esquecer de assumir <code>n &gt; 1</code></strong> (ou outro <code>n₀</code>) antes de trocar termos — sem isso, as desigualdades <code>n ≤ n²</code> e <code>1 ≤ n²</code> não valem para todo n.</li>
+  <li><strong>Aplicar regra de três em função não linear</strong> — sempre volte para a fórmula <code>T(n) = c·nᵏ</code> e substitua.</li>
+  <li><strong>Esquecer de converter unidades de tempo</strong> (dia, mês, ano, século) para segundos antes de igualar à fórmula em microssegundos.</li>
+  <li><strong>Misturar log₂ com log₁₀</strong> — para notação assintótica não importa (a diferença é uma constante), mas para os cálculos numéricos de "quanto n cabe" importa muito.</li>
+  <li><strong>Achar que TAD é sinônimo de struct</strong> — TAD é o <em>conjunto de operações e garantias</em>; a struct é só um detalhe de implementação.</li>
+</ol>
+
+<h3>5.3 Miniexercícios de revisão rápida</h3>
+
+<ol>
+  <li>Prove que <code>3n² + 2n = Θ(n²)</code>.</li>
+  <li>Um algoritmo Θ(n) leva 2s para n=10⁶. Quanto levaria um algoritmo Θ(n²) com a mesma constante, para o mesmo n?</li>
+  <li>Se dobrar o tamanho da entrada multiplica o tempo por 8, que classe de complexidade (em termos de nᵏ) esse algoritmo provavelmente tem?</li>
+  <li>Explique, em uma frase, a diferença entre "usar" e "implementar" um TAD.</li>
+</ol>
+
+<details><summary>Respostas resumidas</summary><div class="conteudo">
+<ol>
+  <li>Assumindo n&gt;1: <code>3n²+2n ≤ 3n²+2n² = 5n²</code> (teto) e <code>n² ≤ 3n²+2n</code> (piso, trivial). c₁=1, c₂=5, n₀=1.</li>
+  <li>2.000.000 segundos (2s × 10⁶), já que multiplicar n por si mesmo na fórmula quadrática multiplica o tempo pelo próprio n.</li>
+  <li>Cúbico — Θ(n³), porque <code>(2n)³ = 8n³</code>, ou seja, dobrar a entrada multiplica o tempo por 8.</li>
+  <li>Usar um TAD é chamar suas operações sem saber como elas são implementadas por dentro; implementar é escrever a struct e o corpo das funções que cumprem esse contrato.</li>
+</ol>
+</div></details>
+
+<hr>
+
+<p class="rodape">Apostila de estudos para SI201 B — Estruturas de Dados I (2026/S2), cobrindo as aulas 1 a 3 (notação assintótica, tempo de execução e tipo abstrato de dados), com base na apostila oficial da disciplina (prof. Luis A. A. Meira). Os exemplos e exercícios aqui são variações próprias para prática — resolva também os enunciados originais numerados na apostila do professor.</p>
+
+</div>
+</body>
+</html>
