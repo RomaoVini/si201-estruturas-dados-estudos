@@ -1,0 +1,11 @@
+# Compiled C artifacts
+*.exe
+*.o
+*.obj
+
+# Build and program output directories
+**/build/
+**/output/
+
+# Local VS Code settings for the Filas exercise
+/Exs de Filas/.vscode/
