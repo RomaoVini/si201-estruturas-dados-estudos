@@ -32,9 +32,9 @@ int altura(No* no){
         int he = altura(no->esq);
         int hd = altura(no->dir);
         if(he>hd){
-            return he++;
+            return he+1;
         }else{
-            return hd++;
+            return hd+1;
         }
     }
 }
