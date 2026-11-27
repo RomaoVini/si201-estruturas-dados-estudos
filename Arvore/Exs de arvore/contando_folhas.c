@@ -1,0 +1,144 @@
+#include <stdlib.h>
+#include <stdio.h>
+#define True 1
+#define False 0
+typedef struct No{
+    int valor;
+    struct No *esq,*dir;
+}No;
+
+typedef struct Tree{
+    No *raiz;
+}Tree;
+
+No *newNo(int valor){
+    No *no=(No*)malloc(sizeof(No));
+    no->valor=valor;
+    no->dir=NULL;
+    no->esq=NULL;
+    return no;
+}
+
+Tree *newTree(){
+    Tree *t = (Tree*)malloc(sizeof(Tree));
+    t->raiz=NULL;
+    return t;
+}
+
+void addTreeit(Tree *t, int valor){
+    No *aux;
+    aux= t->raiz;
+    int controle = False;
+    if(aux==NULL){
+        t->raiz=newNo(valor);
+        return;
+    }
+    while (!controle){
+        if(valor<=aux->valor){
+            if(aux->esq!=NULL){
+                aux=aux->esq;
+            }else{
+                aux->esq=newNo(valor);
+                controle = True;
+            }
+        }else{
+            if(aux->dir!=NULL){
+                aux=aux->dir;
+            }else{
+                aux->dir=newNo(valor);
+                controle = True;
+            }
+        }
+    }
+    
+}
+
+void addNo(No *no, int valor){
+    if(valor<=no->valor){
+        if(no->esq!=NULL){
+            addNo(no->esq,valor);
+        }else{
+            no->esq=newNo(valor);
+        }
+    }else{
+        if(no->dir!=NULL){
+            addNo(no->dir,valor);
+        }else{
+            no->dir=newNo(valor);
+        }
+    }
+}
+
+void addTree(Tree *t,int valor){
+    if(t->raiz==NULL){
+        t->raiz=newNo(valor);
+    }else{
+        addNo(t->raiz,valor);
+    }
+}
+
+No *buscaRec(No *no, int valor){
+    if(no==NULL){
+        return NULL;
+    }
+    if(valor == no->valor){
+        return no;
+    }else if(valor<=no->valor){
+        return buscaRec(no->esq,valor);
+    }else{
+        return buscaRec(no->dir,valor);
+    }
+}
+
+No * buscaIterativa(No *no,int valor){
+    if(no==NULL){
+        return NULL;
+    }
+    No *aux =no;
+    while (aux!=NULL){
+        if(valor==aux->valor){
+            return aux;
+        }else if(valor<=aux->valor){
+            aux=aux->esq;
+        }else{
+            aux=aux->dir;
+        }
+    }
+    return NULL;
+}
+
+int contaFolhas(No *no){
+    if(no==NULL){
+        return 0;
+    }
+    int esquerda = contaFolhas(no->esq);
+    int direita = contaFolhas(no->dir);
+    if(no->esq==NULL && no->dir==NULL){
+        return 1;
+    }
+    
+    return esquerda + direita;
+}
+
+int main(){
+    Tree *t = newTree();
+    addTree(t, 31);
+    addTree(t, 64);
+    addTree(t, 72);
+    addTree(t, 51);
+    addTree(t, 10);
+    addTree(t, 63);
+    addTree(t, 45);
+    addTree(t, 52);
+    addTree(t, 3);
+    addTree(t, 1);
+
+    int folhas = contaFolhas(t->raiz);
+    if (folhas >1){
+        printf("Existem %i Folhas nessa arvore",folhas);
+    }else{
+        printf("Nao existe\n"); 
+    }
+
+    return 0;
+}
